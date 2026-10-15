@@ -1,0 +1,175 @@
+---
+interface Props { article: string }
+const { article } = Astro.props;
+---
+<section class="journal-comments" data-journal-comments data-article={article} aria-labelledby="comments-heading">
+  <h2 id="comments-heading">Discussion</h2>
+  <p class="comments-intro">Leave a comment with your name. Comments appear after approval. Names are not verified.</p>
+  <button type="button" data-load>Load comments &amp; join the discussion</button>
+  <p data-notice role="status" aria-live="polite"></p>
+  <div data-list></div>
+  <button type="button" data-more hidden>Load more comments</button>
+  <form data-form hidden>
+    <h3>Leave a comment</h3>
+    <label>Your name <input name="name" type="text" maxlength="60" autocomplete="nickname" required /></label>
+    <label>Comment <textarea name="body" rows="5" maxlength="3000" required></textarea></label>
+    <div class="comment-honeypot" aria-hidden="true">
+      <label>Leave this blank <input name="website" tabindex="-1" autocomplete="off" /></label>
+    </div>
+    <p class="comments-privacy">Your name and comment will be public if approved. No account or email is needed. Cloudflare checks submissions for spam. Plain text only; up to 3,000 characters.</p>
+    <p class="comments-privacy">To limit spam, we store a daily hashed network identifier with submissions, not your raw IP address. <a href="/contact/">Contact me</a> to request removal of a comment.</p>
+    <div data-challenge></div>
+    <button type="submit" disabled>Submit for approval</button>
+    <p data-form-notice role="status" aria-live="polite"></p>
+  </form>
+  <noscript><p>JavaScript is needed to read and submit comments. The article remains available above.</p></noscript>
+</section>
+
+<script>
+  interface CommentRow { id: string; name: string; body: string; created_at: number }
+  interface TurnstileAPI {
+    render: (element: HTMLElement, options: Record<string, unknown>) => string;
+    reset: (id: string) => void;
+  }
+  const commentWindow = window as typeof window & { turnstile?: TurnstileAPI };
+  let challengeScript: Promise<TurnstileAPI> | undefined;
+  function loadChallenge(): Promise<TurnstileAPI> {
+    if (commentWindow.turnstile) return Promise.resolve(commentWindow.turnstile);
+    if (challengeScript) return challengeScript;
+    challengeScript = new Promise<TurnstileAPI>((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+      script.async = true;
+      const fail = () => { clearTimeout(timer); script.remove(); challengeScript = undefined; reject(new Error('The spam check could not load. Try loading comments again.')); };
+      const timer = window.setTimeout(fail, 15000);
+      script.onerror = fail;
+      script.onload = () => {
+        clearTimeout(timer);
+        if (commentWindow.turnstile) resolve(commentWindow.turnstile); else fail();
+      };
+      document.head.append(script);
+    });
+    return challengeScript;
+  }
+
+  for (const section of document.querySelectorAll<HTMLElement>('[data-journal-comments]')) {
+    const article = section.dataset.article!;
+    const load = section.querySelector<HTMLButtonElement>('[data-load]')!;
+    const more = section.querySelector<HTMLButtonElement>('[data-more]')!;
+    const notice = section.querySelector<HTMLElement>('[data-notice]')!;
+    const list = section.querySelector<HTMLElement>('[data-list]')!;
+    const form = section.querySelector<HTMLFormElement>('[data-form]')!;
+    const formNotice = section.querySelector<HTMLElement>('[data-form-notice]')!;
+    const submit = form.querySelector<HTMLButtonElement>('[type="submit"]')!;
+    const name = form.elements.namedItem('name') as HTMLInputElement;
+    const body = form.elements.namedItem('body') as HTMLTextAreaElement;
+    const website = form.elements.namedItem('website') as HTMLInputElement;
+    let cursor: string | null = null;
+    let token = '';
+    let widget: string | undefined;
+    let submitting = false;
+    const shown = new Set<string>();
+
+    const read = async (response: Response) => {
+      if (!response.headers.get('content-type')?.includes('application/json')) throw new Error('Comments are temporarily unavailable. Please try again later.');
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Comments are temporarily unavailable. Please try again later.');
+      return data;
+    };
+    const invalidateChallenge = () => { token = ''; submit.disabled = true; };
+    const draw = (comments: CommentRow[]) => {
+      for (const comment of comments) {
+        if (shown.has(comment.id)) continue;
+        shown.add(comment.id);
+        const item = document.createElement('article');
+        item.className = 'journal-comment';
+        const heading = document.createElement('h3');
+        heading.textContent = comment.name;
+        const date = document.createElement('time');
+        date.dateTime = new Date(comment.created_at).toISOString();
+        date.textContent = new Date(comment.created_at).toLocaleDateString(undefined, { dateStyle: 'medium' });
+        const text = document.createElement('p');
+        text.textContent = comment.body;
+        item.append(heading, date, text);
+        list.append(item);
+      }
+    };
+    const fetchComments = async (append = false) => {
+      load.disabled = true; more.disabled = true;
+      notice.textContent = 'Loading comments…';
+      try {
+        const query = new URLSearchParams({ article });
+        if (append && cursor) query.set('cursor', cursor);
+        const data = await read(await fetch(`/api/comments?${query}`, { cache: 'no-store', signal: AbortSignal.timeout(15000) }));
+        if (!append) { shown.clear(); list.replaceChildren(); }
+        draw(data.comments);
+        cursor = data.nextCursor;
+        more.hidden = !cursor;
+        notice.textContent = shown.size ? '' : 'No approved comments yet. Be the first to join the discussion.';
+        form.hidden = !data.accepting;
+        load.hidden = true;
+        if (!data.accepting) {
+          notice.textContent = 'New comments are currently unavailable.';
+        } else if (widget === undefined) {
+          const api = await loadChallenge();
+          widget = api.render(form.querySelector<HTMLElement>('[data-challenge]')!, {
+            sitekey: data.siteKey, action: 'journal-comment', theme: 'auto',
+            callback: (value: string) => { token = value; submit.disabled = submitting; },
+            'expired-callback': invalidateChallenge,
+            'error-callback': () => { invalidateChallenge(); formNotice.textContent = 'The spam check could not complete. Reload comments to try again.'; load.hidden = false; load.textContent = 'Reload comments'; },
+          });
+        }
+      } catch (error) {
+        notice.textContent = error instanceof Error && error.name !== 'TimeoutError' ? error.message : 'Comments are taking too long to load. Please try again.';
+        load.hidden = false; load.textContent = 'Retry loading comments';
+      } finally { load.disabled = false; more.disabled = false; }
+    };
+    load.addEventListener('click', () => {
+      if (widget !== undefined) { invalidateChallenge(); commentWindow.turnstile?.reset(widget); }
+      void fetchComments();
+    });
+    more.addEventListener('click', () => void fetchComments(true));
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      if (!token || submitting || !form.reportValidity()) return;
+      submitting = true; submit.disabled = true;
+      formNotice.textContent = 'Submitting…';
+      try {
+        const data = await read(await fetch('/api/comments', {
+          method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ article, name: name.value, body: body.value, website: website.value, token }),
+          signal: AbortSignal.timeout(15000),
+        }));
+        body.value = ''; website.value = '';
+        formNotice.textContent = data.message;
+      } catch (error) {
+        formNotice.textContent = error instanceof Error && error.name !== 'TimeoutError' ? error.message : 'The request timed out. Your text is still here. Wait before retrying to avoid a duplicate submission.';
+      } finally {
+        submitting = false;
+        invalidateChallenge();
+        if (widget !== undefined) commentWindow.turnstile?.reset(widget);
+      }
+    });
+  }
+</script>
+
+<style>
+  .journal-comments { margin-top: var(--space-lg); padding-top: var(--space-md); border-top: 1px solid var(--border-color); font-family: var(--font-ui); }
+  .journal-comments h2 { font-size: 1.75rem; margin-bottom: 1rem; }
+  .journal-comments h3 { font-size: 1.15rem; margin-bottom: .5rem; }
+  .journal-comments p { font-size: 1rem; }
+  .comments-intro, .comments-privacy { color: var(--text-secondary); }
+  .journal-comments button { padding: .65rem 1rem; border: 1px solid var(--accent); border-radius: var(--radius-sm); background: var(--accent); color: var(--bg-primary); font: inherit; font-weight: 700; cursor: pointer; }
+  .journal-comments button:disabled { opacity: .6; cursor: wait; }
+  .journal-comments form { margin-top: var(--space-md); }
+  .journal-comments label { display: block; margin: 1rem 0; font-weight: 700; }
+  .journal-comments input, .journal-comments textarea { display: block; width: 100%; box-sizing: border-box; margin-top: .4rem; padding: .7rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-surface); color: var(--text-primary); font: inherit; }
+  .journal-comments textarea { resize: vertical; min-height: 8rem; }
+  .journal-comments :is(button, input, textarea):focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .comment-honeypot { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .journal-comments [hidden] { display: none !important; }
+  .journal-comments :global(.journal-comment) { padding: 1.25rem 0; border-bottom: 1px solid var(--border-color); }
+  .journal-comments :global(.journal-comment h3) { margin-bottom: .25rem; font: 700 1rem var(--font-ui); overflow-wrap: anywhere; }
+  .journal-comments :global(.journal-comment time) { font-size: .85rem; color: var(--text-secondary); }
+  .journal-comments :global(.journal-comment p) { white-space: pre-wrap; overflow-wrap: anywhere; margin: .75rem 0 0; font: 1rem/1.6 var(--font-ui); }
+</style>

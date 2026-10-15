@@ -159,3 +159,7 @@ This repository deliberately keeps documentation small and durable:
 - **`SITE_MAP.md`** — public information architecture, route map, Tina map, and source map
 
 Historical sprint logs, temporary audits, implementation notes, and superseded guides are intentionally not retained as active documentation; Git history remains available when historical detail is needed.
+
+## Journal comments
+
+Name-only guest comments are moderated under **Content → Comments**. Only approved comments are public. [COMMENTS_SETUP.md](COMMENTS_SETUP.md) covers the one-time Cloudflare D1/Turnstile setup required to activate the feature.

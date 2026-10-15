@@ -1,4 +1,5 @@
 ---
+import JournalComments from "../components/journal/JournalComments.astro";
 import BaseLayout from "./BaseLayout.astro";
 import ArticleMeta from "../components/journal/ArticleMeta.astro";
 import Gallery from "../components/portfolio/Gallery.astro";
@@ -27,6 +28,8 @@ interface RelatedEntry {
 }
 
 interface Props {
+  articleId: string;
+  commentsDisabled?: boolean;
   title: string;
   description: string;
   date?: Date;
@@ -44,6 +47,8 @@ interface Props {
 }
 
 const {
+  articleId,
+  commentsDisabled = false,
   title,
   description,
   date,
@@ -116,6 +121,8 @@ const videos = media.filter((item) => item.type === "video");
           </div>
         </section>
       )}
+
+      {!commentsDisabled && <JournalComments article={articleId} />}
 
       <TagLinks {tags} label="Explore these subjects" />
       <RelatedEntries entries={relatedEntries} />

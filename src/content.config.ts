@@ -85,6 +85,7 @@ const entries = defineCollection({
         tags: entryTopics,
         coverImage: imageSource.optional(),
         draft: z.boolean().default(false),
+        commentsDisabled: z.boolean().default(false),
         immichGallery: immichGallery.optional(),
         media: z.array(mediaItem).default([]),
     }),

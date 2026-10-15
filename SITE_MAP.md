@@ -303,3 +303,11 @@ Only these durable project documents are intended to remain active:
 - `SITE_MAP.md` — this architecture and information map
 
 Use Git history for superseded implementation notes and sprint history.
+
+## Journal comments
+
+- Journal article pages include a reader-initiated moderated discussion.
+- `/api/comments` lists approved comments and accepts pending guest submissions.
+- `/comment-articles.json` lists published entries eligible for comments.
+- `/admin/api/comments` supports owner-only moderation through **Content → Comments**.
+- Setup and data/privacy boundaries: `COMMENTS_SETUP.md`.

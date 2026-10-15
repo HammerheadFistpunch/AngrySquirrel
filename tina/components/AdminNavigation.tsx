@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import type { TinaCMS } from "tinacms";
+import { CommentsScreen } from "./CommentsScreen";
 import { PublishSiteScreen } from "./PublishSite";
 import { ImportEntryScreen } from "./ImportEntryScreen";
 
@@ -176,6 +177,13 @@ export const installAdminNavigation = (cms: TinaCMS) => {
             Icon: NavigationIcon,
             layout: "fullscreen",
             navCategory: "Content",
+        } as never);
+    }
+
+    if (!screens.some((screen) => screen.name === "Comments")) {
+        cms.plugins.add({
+            __type: "screen", name: "Comments", Component: CommentsScreen,
+            Icon: NavigationIcon, layout: "fullscreen", navCategory: "Content",
         } as never);
     }
 

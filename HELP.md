@@ -127,6 +127,12 @@ The underlying collection is still named `tags` and public Topic pages remain `/
 
 Set **Featured Journal Story** under **Content → Journal Homepage** once. Both the main homepage preview and Journal homepage use this selection. Leave it blank to feature the newest published story. Draft or missing selections also fall back to the newest published story; no published stories means no featured tile. The main homepage's Journal Preview Section controls presentation and recent-story count only.
 
+## Journal comments
+
+Readers can leave a name and plain-text comment without an account or email. Comments stay private until you approve them under **Content → Comments**. That screen also lets you reject/hide or permanently delete comments. Approval is live; no Publish Site action is needed for moderation.
+
+To hide discussion on a particular article, turn on **Disable Comments**, save, and publish. Commenting requires the one-time Cloudflare setup in [COMMENTS_SETUP.md](COMMENTS_SETUP.md).
+
 ## 5. Markdown editor
 
 Journal bodies and supported page body fields use a Markdown-first editor.

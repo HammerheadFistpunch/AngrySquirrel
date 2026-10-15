@@ -84,6 +84,6 @@ const { entry, relatedEntries, tags, sectionLabel } = Astro.props;
 const { Content } = await render(entry);
 ---
 
-<EntryLayout {...entry.data} {tags} {relatedEntries} {sectionLabel}>
+<EntryLayout articleId={entry.id} {...entry.data} {tags} {relatedEntries} {sectionLabel}>
   <Content components={{ YouTube: YouTubeEmbed }} />
 </EntryLayout>

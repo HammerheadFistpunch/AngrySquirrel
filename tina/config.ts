@@ -452,6 +452,7 @@ export default defineConfig({
                     { type: "string", name: "title", label: "Title", required: true, isTitle: true },
                     { type: "string", name: "body", label: "Entry Content (Markdown)", description: "Write portable Markdown. Use the toolbar for formatting, links, Immich/R2, managed/external images, and YouTube embeds.", required: true, isBody: true, ui: { component: MarkdownBodyField } },
                     { type: "string", name: "journalSection", label: "Journal Section", description: "Choose one active section, or leave blank for Latest only.", ui: { component: JournalSectionField } },
+                    { type: "boolean", name: "commentsDisabled", label: "Disable Comments", description: "Hide the discussion and stop new comments on this entry after publishing. Leave off to allow moderated comments." },
                     { type: "boolean", name: "draft", label: "Status", description: "Choose whether this story is public.", ui: { component: PublicationStatusField } },
                     {
                         type: "object",

@@ -321,6 +321,10 @@ Periodically verify:
 
 `src/content/pages/journal.md` owns `featuredEntry`. Both homepages use `src/lib/featured-journal.ts` to resolve references and select only published stories, with the newest published entry as fallback. Do not add a second featured-story setting to `home.md` or its Tina schema. Update the shared selector and its tests if selection behavior changes.
 
+## Journal comment operations
+
+Follow [COMMENTS_SETUP.md](COMMENTS_SETUP.md) for D1/Turnstile activation, Access protections, live checks, privacy, moderation, backup, and recovery. Visitor comments live in the `COMMENTS_DB` D1 binding, not Git. Apply `migrations/0001_journal_comments.sql` before enabling submissions. Existing Access configuration protects **Content → Comments** through `/admin/api/comments`; keep the reader endpoint `/api/comments` public. Article eligibility comes from the deployed `/comment-articles.json` manifest. Never expose pending comments or IP-derived rate keys through public APIs.
+
 ## 12. Documentation maintenance
 
 Keep only these durable project docs current:
@@ -330,5 +334,6 @@ Keep only these durable project docs current:
 - `Roadmap.md`
 - `SITE_MAINTENANCE_GUIDE.md`
 - `SITE_MAP.md`
+- `COMMENTS_SETUP.md`
 
 When a feature changes, update the appropriate durable guide in the same change. Implementation history belongs in Git commits/issues rather than permanent sprint logs.

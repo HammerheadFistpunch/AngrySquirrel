@@ -100,33 +100,11 @@ Acceptance goals:
 
 ### 3. Journal comments/community layer
 
-**Status: evaluate before implementation.**
+**Status: implemented; Cloudflare activation and live smoke test pending.**
 
-Comments are now a planned feature area rather than merely an optional idea. Do not select a platform until the operational, privacy, moderation, and security tradeoffs are compared.
+Selected native Pages Functions + D1 + Turnstile after comparing GitHub-backed, hosted guest, and native options. Readers enter a name without an account or email. Every comment waits for approval in **Content → Comments**; only approved comments are public. Approval, hiding, and deletion work without a site rebuild. Per-entry Disable Comments, published-article eligibility, same-origin checks, payload limits, Turnstile verification, and database rate limits are included.
 
-Evaluate at least:
-
-- GitHub-backed systems such as Giscus
-- lightweight hosted comment systems
-- self-hosted approaches that fit the existing static/Cloudflare architecture
-
-Requirements:
-
-- low maintenance
-- strong spam resistance
-- practical moderation
-- minimal tracking/privacy impact
-- dark-theme compatibility
-- no meaningful ongoing cost
-- no unnecessary exposure of the home Immich/server environment
-- graceful behavior if the comment provider is unavailable
-
-Acceptance goals:
-
-- comments can be enabled deliberately on Journal content without making the static site fragile
-- moderation and deletion workflows are understood before launch
-- privacy/security implications are documented
-- the chosen system does not become a second content source of truth for the site's authored articles
+See `COMMENTS_SETUP.md` for the comparison, production bindings/secrets, migration, moderation/privacy policy, backup steps, and live acceptance test. The feature stays unavailable for submissions until D1 and Turnstile are configured. Articles remain readable if commenting fails.
 
 ### 4. Gallery architecture and privacy
 

@@ -161,6 +161,16 @@ const sanitizePreview = (html: string) => {
             element.setAttribute("allowfullscreen", "");
         }
 
+        // Preserve semantic formatting without accepting arbitrary styles or attributes.
+        if (tag === "ol") {
+            const start = originalAttributes.get("start") || "";
+            if (/^-?\d+$/.test(start)) element.setAttribute("start", start);
+        }
+        if (tag === "th" || tag === "td") {
+            const align = originalAttributes.get("align") || "";
+            if (/^(left|center|right)$/.test(align)) element.setAttribute("align", align);
+        }
+
         if (tag === "code") {
             const className = originalAttributes.get("class") || "";
             if (/^language-[a-z0-9_-]+$/i.test(className)) element.setAttribute("class", className);
@@ -204,14 +214,14 @@ const styles: Record<string, CSSProperties> = {
         width: "100%", height: 520, minHeight: 0, boxSizing: "border-box", padding: 16,
         border: "1px solid #d1d5db", borderRadius: 8, background: "#111827",
         color: "#f9fafb", fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-        fontSize: 14, lineHeight: 1.65, overflowY: "auto", resize: "none", tabSize: 4,
+        fontSize: 16, lineHeight: 1.65, overflowY: "auto", resize: "none", tabSize: 4,
     },
     preview: {
         width: "100%", maxWidth: "100%", height: 520, minHeight: 0, boxSizing: "border-box",
         padding: 20, overflowX: "hidden", overflowY: "auto", overflowWrap: "anywhere",
         whiteSpace: "normal", wordBreak: "break-word", border: "1px solid #d1d5db",
         borderRadius: 8, background: "#ffffff", color: "#1f2937",
-        fontFamily: "Georgia, Cambria, 'Times New Roman', serif", fontSize: 16, lineHeight: 1.7,
+        fontFamily: "Georgia, Cambria, 'Times New Roman', serif", fontSize: 18, lineHeight: 1.7,
     },
     warning: {
         margin: "0 0 12px", padding: "10px 12px", border: "1px solid #f59e0b",
@@ -448,18 +458,46 @@ export default function MarkdownBodyField({ input, field, meta }: MarkdownBodyFi
                 .markdown-body-preview blockquote,
                 .markdown-body-preview figcaption,
                 .markdown-body-preview code { overflow-wrap: anywhere; word-break: break-word; white-space: normal; }
-                .markdown-body-preview h1,
-                .markdown-body-preview h2,
-                .markdown-body-preview h3 { line-height: 1.25; margin: 1.5em 0 0.6em; }
+                /* Tina's reset removes native Markdown typography. Keep these rules
+                   scoped to the preview so admin and public-site styles stay independent. */
+                .markdown-body-preview :is(p, li, blockquote, th, td) {
+                    font-size: inherit; line-height: inherit; color: inherit;
+                }
+                .markdown-body-preview p { margin: 0 0 1em; }
+                .markdown-body-preview :is(h1, h2, h3, h4, h5, h6) {
+                    font-family: inherit; font-weight: 700; line-height: 1.3;
+                    letter-spacing: normal; color: #111827; margin: 1.25em 0 0.5em;
+                }
+                .markdown-body-preview h1 { font-size: 1.6em; }
+                .markdown-body-preview h2 { font-size: 1.4em; }
+                .markdown-body-preview h3 { font-size: 1.2em; }
+                .markdown-body-preview h4 { font-size: 1.1em; }
+                .markdown-body-preview h5 { font-size: 1em; }
+                .markdown-body-preview h6 { font-size: 0.95em; }
+                .markdown-body-preview strong { font-weight: 700; }
+                .markdown-body-preview em { font-style: italic; }
+                .markdown-body-preview del { text-decoration: line-through; }
+                .markdown-body-preview :is(ul, ol) { margin: 0 0 1em; padding-left: 1.75em; list-style-position: outside; }
+                .markdown-body-preview ul { list-style-type: disc; }
+                .markdown-body-preview ol { list-style-type: decimal; }
+                .markdown-body-preview ul ul { list-style-type: circle; }
+                .markdown-body-preview ul ul ul { list-style-type: square; }
+                .markdown-body-preview li { display: list-item; margin: 0.3em 0; }
+                .markdown-body-preview li > :is(ul, ol) { margin: 0.3em 0; }
+                .markdown-body-preview li > p { margin: 0.3em 0; }
+                .markdown-body-preview hr { border: 0; border-top: 1px solid #d1d5db; margin: 1.5em 0; }
                 .markdown-body-preview a { color: #2563eb; text-decoration: underline; }
                 .markdown-body-preview img { display: block; width: auto; max-width: 100%; height: auto; object-fit: contain; margin: 1rem 0; border-radius: 6px; }
                 .markdown-body-preview blockquote { margin: 1rem 0; padding-left: 1rem; border-left: 4px solid #9ca3af; color: #4b5563; }
                 .markdown-body-preview pre { width: 100%; min-width: 0; max-width: 100%; box-sizing: border-box; overflow-x: auto; padding: 1rem; border-radius: 6px; background: #111827; color: #f9fafb; }
-                .markdown-body-preview code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
-                .markdown-body-preview pre code { overflow-wrap: normal; word-break: normal; white-space: pre; }
+                .markdown-body-preview code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.9em; background: #f3f4f6; padding: 0.15em 0.3em; border-radius: 3px; }
+                .markdown-body-preview pre code { overflow-wrap: normal; word-break: normal; white-space: pre; background: transparent; padding: 0; color: inherit; }
                 .markdown-body-preview table { display: block; width: 100%; max-width: 100%; overflow-x: auto; border-collapse: collapse; }
                 .markdown-body-preview th,
                 .markdown-body-preview td { padding: 0.5rem; border: 1px solid #d1d5db; text-align: left; }
+                .markdown-body-preview th { font-weight: 700; background: #f3f4f6; }
+                .markdown-body-preview :is(th, td)[align="center"] { text-align: center; }
+                .markdown-body-preview :is(th, td)[align="right"] { text-align: right; }
                 .markdown-body-preview .markdown-youtube-preview { display: grid; gap: 0.5rem; width: 100%; max-width: 100%; margin: 1rem 0; font-family: ui-sans-serif, system-ui, sans-serif; }
                 .markdown-body-preview div.markdown-youtube-preview { box-sizing: border-box; padding: 1rem; border: 1px solid #93c5fd; border-radius: 6px; background: #eff6ff; }
                 .markdown-body-preview .markdown-youtube-preview span,

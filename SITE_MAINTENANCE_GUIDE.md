@@ -296,6 +296,8 @@ Importer changes should preserve these invariants:
 - imported output becomes a Draft in the normal Journal collection
 - ordinary Markdown stays portable
 
+Preview typography is scoped in `tina/components/MarkdownBodyField.tsx` because Tina resets native heading/list/emphasis styles. Keep source text readable, heading sizes compact, and semantic formatting visible without allowing arbitrary inline styles through the sanitizer.
+
 Run `npm run test:authoring` after importer, Markdown editor, or Journal schema changes.
 
 ## 11. Security checklist

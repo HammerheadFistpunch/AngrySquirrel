@@ -127,6 +127,8 @@ The underlying collection is still named `tags` and public Topic pages remain `/
 
 Journal bodies and supported page body fields use a Markdown-first editor.
 
+The source uses 16px text; the sanitized preview uses 18px text with compact headings. Preview formatting includes visible list markers, nested lists, bold/italic/strikethrough, blockquotes, tables, and code. Numbered-list starting values and table alignment are preserved; executable HTML and arbitrary styles remain filtered.
+
 The toolbar supports:
 
 - bold

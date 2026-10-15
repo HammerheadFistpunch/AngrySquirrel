@@ -317,6 +317,10 @@ Periodically verify:
 - old R2 revisions are removed only after repository reference checks
 - public gallery/share architecture is reviewed separately because it has different privacy characteristics from single-image R2 publication
 
+## Featured Journal selection
+
+`src/content/pages/journal.md` owns `featuredEntry`. Both homepages use `src/lib/featured-journal.ts` to resolve references and select only published stories, with the newest published entry as fallback. Do not add a second featured-story setting to `home.md` or its Tina schema. Update the shared selector and its tests if selection behavior changes.
+
 ## 12. Documentation maintenance
 
 Keep only these durable project docs current:

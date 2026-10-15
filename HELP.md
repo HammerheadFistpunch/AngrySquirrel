@@ -123,6 +123,10 @@ Guidance:
 
 The underlying collection is still named `tags` and public Topic pages remain `/tags/[slug]/` for compatibility.
 
+## Featured Journal story
+
+Set **Featured Journal Story** under **Content → Journal Homepage** once. Both the main homepage preview and Journal homepage use this selection. Leave it blank to feature the newest published story. Draft or missing selections also fall back to the newest published story; no published stories means no featured tile. The main homepage's Journal Preview Section controls presentation and recent-story count only.
+
 ## 5. Markdown editor
 
 Journal bodies and supported page body fields use a Markdown-first editor.

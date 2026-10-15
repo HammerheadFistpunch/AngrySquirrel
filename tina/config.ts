@@ -318,13 +318,12 @@ export default defineConfig({
                         ],
                     },
                     {
-                        type: "object", name: "journalPreview", label: "Journal Preview Section", required: true,
+                        type: "object", name: "journalPreview", label: "Journal Preview Section", description: "Featured story is managed under Journal Homepage and shared with this preview.", required: true,
                         fields: [
                             { type: "boolean", name: "visible", label: "Show Journal Preview" },
                             { type: "string", name: "title", label: "Section Title", required: true },
                             { type: "string", name: "titleHref", label: "Title Link", required: true, description: "Site path linked from the section title, such as /journal/." },
                             { type: "string", name: "subtitle", label: "Section Description", required: true, ui: { component: "textarea" } },
-                            { type: "reference", name: "featuredEntry", label: "Featured Journal Story", collections: ["entries"] },
                             { type: "number", name: "recentLimit", label: "Recent Story Count", required: true },
                             { type: "string", name: "emptyMessage", label: "Empty-State Message", required: true },
                         ],
@@ -377,7 +376,7 @@ export default defineConfig({
                     { type: "string", name: "description", label: "Description", required: true, ui: { component: "textarea" } },
                     { type: "string", name: "sectionTitle", label: "Content Section Title", required: true },
                     { type: "string", name: "emptyMessage", label: "Empty-State Message", required: true },
-                    { type: "reference", name: "featuredEntry", label: "Featured Journal Story", collections: ["entries"] },
+                    { type: "reference", name: "featuredEntry", label: "Featured Journal Story", description: "Shown on both the main homepage preview and Journal homepage. Leave blank to feature the newest published story. Draft or missing selections also fall back to the newest published story.", collections: ["entries"] },
                 ],
             },
             {

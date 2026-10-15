@@ -37,6 +37,10 @@ The core platform is operational:
 - Restored explicit Markdown typography in the sanitized preview so Tina resets do not hide list markers or emphasis.
 - Preserved safe ordered-list starts and table alignment during sanitization.
 
+## Shared featured story (2026-10-14)
+
+Journal Homepage owns the featured-story selection for both `/` and `/journal/`. Removed the duplicate main-homepage field and content value. Both surfaces resolve Tina references consistently and fall back to the newest published story when the selection is empty, missing, or a draft.
+
 ## Active priorities
 
 ### 1. Page-header simplification and homepage identity

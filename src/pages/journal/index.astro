@@ -1,5 +1,6 @@
 ---
 import { getCollection, getEntry } from "astro:content";
+import { selectFeaturedJournalEntry } from "../../lib/featured-journal";
 import JournalLanding, { type JournalPostSummary } from "../../components/journal/JournalLanding.astro";
 import { createJournalSectionRegistry, resolveJournalSection } from "../../lib/journal-sections";
 import { createTagRegistry, resolveTagReferences } from "../../lib/tags";
@@ -28,9 +29,7 @@ const summarize = (entry: (typeof entries)[number]): JournalPostSummary => ({
   tags: resolveTagReferences(entry.data.tags, tagRegistry, entry.data.title),
 });
 
-const featuredEntry = entries.find(
-  (entry) => `src/content/entries/${entry.id}.mdx` === page.featuredEntry,
-);
+const featuredEntry = selectFeaturedJournalEntry(entries, page.featuredEntry);
 const featuredPost = featuredEntry ? summarize(featuredEntry) : undefined;
 const posts = entries.filter((entry) => entry.id !== featuredEntry?.id).map(summarize);
 ---

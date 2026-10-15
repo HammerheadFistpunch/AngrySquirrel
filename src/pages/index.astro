@@ -1,5 +1,6 @@
 ---
 import { getCollection, getEntry } from "astro:content";
+import { selectFeaturedJournalEntry } from "../lib/featured-journal";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Button from "../components/ui/Button.astro";
 import Container from "../components/ui/Container.astro";
@@ -19,17 +20,11 @@ const journalEntries = (await getCollection("entries", ({ data }) => !data.draft
   (a, b) => (b.data.date?.getTime() ?? 0) - (a.data.date?.getTime() ?? 0),
 );
 
-function referencedEntryId(reference?: string) {
-  return reference
-    ?.replaceAll("\\", "/")
-    .replace(/^src\/content\/entries\//, "")
-    .replace(/\.mdx$/, "")
-    .toLowerCase();
+const journalPage = await getEntry("pages", "journal");
+if (!journalPage || journalPage.data.pageType !== "archive") {
+  throw new Error("Missing Journal page content: src/content/pages/journal.md");
 }
-
-const selectedJournalId = referencedEntryId(page.journalPreview.featuredEntry);
-const featuredArticle =
-  journalEntries.find((entry) => entry.id.toLowerCase() === selectedJournalId) ?? journalEntries[0];
+const featuredArticle = selectFeaturedJournalEntry(journalEntries, journalPage.data.featuredEntry);
 const recentArticles = journalEntries
   .filter((entry) => entry.id !== featuredArticle?.id)
   .slice(0, page.journalPreview.recentLimit);

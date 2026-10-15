@@ -44,7 +44,6 @@ journalPreview:
   title: From the Journal
   titleHref: /journal/
   subtitle: Where I store all my best nuts
-  featuredEntry: src/content/entries/Which-Overlander-are-you-The-Farkle-Meister-The-Ghost-The-Strider-The-Autobiography.mdx
   recentLimit: 3
   emptyMessage: Journal entries are coming soon.
 aboutSection:

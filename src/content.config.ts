@@ -168,7 +168,6 @@ const pages = defineCollection({
                 title: z.string(),
                 titleHref: z.string(),
                 subtitle: z.string(),
-                featuredEntry: z.string().optional(),
                 recentLimit: z.number().int().positive().default(3),
                 emptyMessage: z.string(),
             }),

@@ -124,21 +124,27 @@ const videos = media.filter((item) => item.type === "video");
 </BaseLayout>
 
 <style>
-  .entry { padding: var(--space-lg) 0 var(--space-xl); }
+  .entry { padding: var(--space-md) 0 var(--space-xl); }
   .back-links {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-md);
-    margin-bottom: var(--space-lg);
+    margin-bottom: var(--space-sm);
     font-family: var(--font-ui);
     font-weight: 700;
   }
   .entry-header {
-    margin-bottom: var(--space-lg);
-    padding: 0 0 var(--space-md);
+    margin-bottom: var(--space-md);
+    padding: 0 0 var(--space-sm);
     background: transparent;
     border: 0;
     border-bottom: 1px solid var(--border-color);
+  }
+  .entry-header h1 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    line-height: 1.15;
+    margin: 0 0 var(--space-sm);
+    overflow-wrap: anywhere;
   }
   .entry-description,
   .entry-content { font-family: var(--font-editorial); }

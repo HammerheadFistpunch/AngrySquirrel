@@ -30,8 +30,9 @@ The core platform is operational:
 - responsive Immich picker and common structured-image integration
 - RSS, sitemap, robots, canonical, Open Graph, and Twitter metadata
 
-## Latest editor fixes (2026-10-14)
+## Latest editor and article title fixes (2026-10-14)
 
+- Reduced article titles to a responsive 32–48px scale and tightened article header spacing so long titles do not dominate the first screen.
 - Increased Markdown source and preview text sizes and reduced preview heading scale.
 - Restored explicit Markdown typography in the sanitized preview so Tina resets do not hide list markers or emphasis.
 - Preserved safe ordered-list starts and table alignment during sanitization.

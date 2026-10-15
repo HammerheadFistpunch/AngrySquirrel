@@ -4,6 +4,8 @@
 
 Readers provide a name and plain-text comment, with no account or email. All submissions are **pending** until approved. Names are not verified. Only approved comments appear publicly. The owner can approve, reject/hide, return to pending, or permanently delete comments under **Content → Comments** in Tina. Moderation is live: no site rebuild is needed.
 
+Readers can reply to approved top-level comments. One level of replies is supported; replies cannot have further replies. Each reply requires its own approval. Approved replies are loaded on demand beneath their parent, with independent pagination. Hiding a parent hides its replies; reapproving the parent restores approved replies. Permanently deleting a parent also deletes all its replies. The moderation screen shows the parent context and blocks approving a reply while the parent is hidden.
+
 The discussion appears below each published Journal article. Readers click **Load comments & join the discussion** before comments or Cloudflare Turnstile load. Articles remain readable if the comment service is unavailable. No comments are stored in Git or authored Markdown; D1 stores visitor comments only.
 
 The **Disable Comments** checkbox on an entry hides its discussion and blocks public comment reads/submissions after saving and publishing. Stored comments remain available to the owner. Existing entries allow comments by default once the service is configured. Renaming an article filename changes its comment identity; migrate its `article` values in D1 deliberately if moving a published entry. Editing the title does not change its comments.
@@ -23,10 +25,11 @@ This avoids running anything on the home/Immich server. D1 and Pages Functions h
 The code alone does not create Cloudflare resources or activate the service.
 
 1. In Cloudflare **Storage & databases → D1**, create a database named `angrysquirrel-comments` (the database name is arbitrary).
-2. Initialize it with every statement in `migrations/0001_journal_comments.sql`, using the D1 SQL console. The file creates the table and indexes and can safely be reapplied. If using an already authenticated Wrangler installation instead, the equivalent is:
+2. Initialize it with every statement in `migrations/0001_journal_comments.sql`, then apply `migrations/0002_comment_replies.sql` once, using the D1 SQL console. Migration 0001 creates the table and indexes and can safely be reapplied. Migration 0002 adds the reply column; run it only once. If using an already authenticated Wrangler installation instead, the equivalent is:
 
    ```bash
    npx wrangler d1 execute angrysquirrel-comments --remote --file=migrations/0001_journal_comments.sql
+   npx wrangler d1 execute angrysquirrel-comments --remote --file=migrations/0002_comment_replies.sql
    ```
 
 3. In the site's **Workers & Pages → Pages project → Settings → Bindings**, add a **D1 database binding**, named exactly `COMMENTS_DB`, pointing to that database. Add it to Production. Do not bind production comments to preview deployments; use a separate database if testing previews.
@@ -46,15 +49,29 @@ The code alone does not create Cloudflare resources or activate the service.
 
 Official setup references: [Pages bindings](https://developers.cloudflare.com/pages/functions/bindings/), [Turnstile setup](https://developers.cloudflare.com/turnstile/get-started/), [server validation](https://developers.cloudflare.com/turnstile/get-started/server-side-validation/).
 
+## Upgrading an already-working comment database for replies
+
+Before publishing the reply update, open **D1 → angrysquirrel-comments → Console** and run `migrations/0002_comment_replies.sql` once:
+
+```sql
+ALTER TABLE journal_comments ADD COLUMN parent_id TEXT REFERENCES journal_comments(id) ON DELETE CASCADE;
+CREATE INDEX IF NOT EXISTS comments_threads ON journal_comments(article, parent_id, status, created_at, id);
+CREATE INDEX IF NOT EXISTS comments_parent ON journal_comments(parent_id);
+```
+
+Existing comments keep their content/status and receive a null parent, so they remain top-level comments. Old deployed code continues working with the added column. Apply this before deploying new code; new code queries the column. No new keys, bindings, or Tina content fields are required. If you see `duplicate column name: parent_id`, do not repeat the ALTER; use `PRAGMA table_info(journal_comments);` to verify the column and run only the two index statements.
+
+After migration, use **Publish Site** and hard-refresh `/admin/`. On a public article, click **Reply** under an approved comment, submit, approve the pending reply in Tina, reload the discussion, and choose **View replies**. Verify that pending replies stay private and that a reply has no Reply button of its own.
+
 ## Limits, privacy, and moderation
 
 - Names: 1–60 characters; comments: 1–3,000 characters. Plain text is rendered using DOM `textContent` and React escaping, never reader-provided HTML/Markdown.
 - No email addresses or raw IP addresses are saved in the comment database. An HMAC of the network address and UTC day is stored with each submission for abuse limits. It is pseudonymous, changes each day, and is retained until that comment is deleted. Cloudflare still processes requests and Turnstile verification under its own policies; this feature does not change Cloudflare's platform logging.
 - All submissions require same-origin JSON requests, an empty honeypot, and a valid single-use Turnstile token for the current hostname/action. Server-side checks fail closed if Turnstile, D1, the article manifest, or required configuration is unavailable.
 - Rate limits: up to three stored submissions per daily network identifier in ten minutes, and 100 sitewide in ten minutes. People sharing a network share that limit; the daily identifier resets at UTC midnight. Limits are checked inside the SQLite insert. These are spam controls, not identity verification or a guarantee against abuse.
-- Public reads return only approved `id`, `name`, `body`, and creation time, scoped to a published, comment-enabled article. They never expose pending/rejected comments, moderation metadata, or rate identifiers. Public and admin lists paginate in batches of 25. Responses use `Cache-Control: no-store` so moderation changes are visible on reload.
+- Public reads return only approved `id`, `name`, `body`, creation time, parent ID, and approved reply count, scoped to a published, comment-enabled article. They never expose pending/rejected comments, moderation metadata, or rate identifiers. Public root comments, each reply thread, and admin lists paginate independently in batches of 25. Reply reads require an approved root on the same article; public reply counts exclude pending/rejected replies. Responses use `Cache-Control: no-store` so moderation changes are visible on reload.
 - Names can impersonate others. Treat a name as a display label, not an authenticated identity. Review links, spam, personal information, and abusive content before approval. There are no automatic email notifications; check the pending queue in Tina.
-- Readers cannot edit/delete their own comments because there are no accounts. The form links to Contact for removal requests. Use **Delete permanently** for removal; **Reject** retains the comment privately for later review. The delete button asks for confirmation.
+- Readers cannot edit/delete their own comments because there are no accounts. The form links to Contact for removal requests. Deleting a parent also permanently deletes every reply under it. Use **Delete permanently** for removal; **Reject** retains the comment privately for later review. The delete button asks for confirmation.
 - Approval/rejection changes appear when a reader next loads comments. Comment text is never returned to the submitter as publicly posted while pending. A lost network response can leave a comment pending even if the UI reports a timeout; refresh the queue before resubmitting.
 - Deleting or unpublishing an article removes its comment eligibility at the next deployment. Its stored discussion is retained privately until deleted by the owner or migrated.
 
@@ -70,4 +87,4 @@ Official setup references: [Pages bindings](https://developers.cloudflare.com/pa
 
 ## Verification
 
-`npm run test:authoring` exercises real SQLite statements through a D1-compatible adapter, covering pending-only submissions, approval/hiding/deletion, public-data boundaries, pagination, rate limits, eligibility, payload validation, Turnstile rejection, same-origin enforcement, and the owner allowlist. Run `npm run build:astro` and a Tina build after schema/UI changes. Production D1/Access/Turnstile verification requires the live setup and smoke test above.
+`npm run test:authoring` exercises real SQLite statements through a D1-compatible adapter, covering pending-only submissions, one-level reply validation, migration preservation, parent visibility/deletion, approval/hiding/deletion, public-data boundaries, pagination, rate limits, eligibility, payload validation, Turnstile rejection, same-origin enforcement, and the owner allowlist. Run `npm run build:astro` and a Tina build after schema/UI changes. Production D1/Access/Turnstile verification requires the live setup and smoke test above.

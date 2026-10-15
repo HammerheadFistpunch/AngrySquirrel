@@ -100,11 +100,11 @@ Acceptance goals:
 
 ### 3. Journal comments/community layer
 
-**Status: implemented; Cloudflare activation and live smoke test pending.**
+**Status: comments activated and smoke-tested; one-level replies implemented, pending migration and deployment.**
 
-Selected native Pages Functions + D1 + Turnstile after comparing GitHub-backed, hosted guest, and native options. Readers enter a name without an account or email. Every comment waits for approval in **Content → Comments**; only approved comments are public. Approval, hiding, and deletion work without a site rebuild. Per-entry Disable Comments, published-article eligibility, same-origin checks, payload limits, Turnstile verification, and database rate limits are included.
+Selected native Pages Functions + D1 + Turnstile after comparing GitHub-backed, hosted guest, and native options. Readers enter a name without an account or email. Comments support one level of replies beneath approved parents. Replies use the same moderation queue, remain private until approval, and disappear publicly when their parent is hidden. Every comment waits for approval in **Content → Comments**; only approved comments are public. Approval, hiding, and deletion work without a site rebuild. Per-entry Disable Comments, published-article eligibility, same-origin checks, payload limits, Turnstile verification, and database rate limits are included.
 
-See `COMMENTS_SETUP.md` for the comparison, production bindings/secrets, migration, moderation/privacy policy, backup steps, and live acceptance test. The feature stays unavailable for submissions until D1 and Turnstile are configured. Articles remain readable if commenting fails.
+See `COMMENTS_SETUP.md` for the comparison, production bindings/secrets, migration, moderation/privacy policy, backup steps, and live acceptance test. Replies require migration `0002_comment_replies.sql` before deployment; the existing D1/Turnstile configuration is reused. Articles remain readable if commenting fails.
 
 ### 4. Gallery architecture and privacy
 

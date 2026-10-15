@@ -129,7 +129,7 @@ Set **Featured Journal Story** under **Content → Journal Homepage** once. Both
 
 ## Journal comments
 
-Readers can leave a name and plain-text comment without an account or email. Comments stay private until you approve them under **Content → Comments**. That screen also lets you reject/hide or permanently delete comments. Approval is live; no Publish Site action is needed for moderation.
+Readers can leave a name and plain-text comment without an account or email. Comments stay private until you approve them under **Content → Comments**. Readers can use **Reply** beneath approved comments; replies appear one level beneath their parent and also need approval. The moderation screen shows the original comment for context. That screen also lets you reject/hide or permanently delete comments. Hiding a parent hides its replies; deleting a parent deletes its replies. Approval is live; no Publish Site action is needed for moderation.
 
 To hide discussion on a particular article, turn on **Disable Comments**, save, and publish. Commenting requires the one-time Cloudflare setup in [COMMENTS_SETUP.md](COMMENTS_SETUP.md).
 

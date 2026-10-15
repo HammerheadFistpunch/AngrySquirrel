@@ -323,7 +323,7 @@ Periodically verify:
 
 ## Journal comment operations
 
-Follow [COMMENTS_SETUP.md](COMMENTS_SETUP.md) for D1/Turnstile activation, Access protections, live checks, privacy, moderation, backup, and recovery. Visitor comments live in the `COMMENTS_DB` D1 binding, not Git. Apply `migrations/0001_journal_comments.sql` before enabling submissions. Existing Access configuration protects **Content → Comments** through `/admin/api/comments`; keep the reader endpoint `/api/comments` public. Article eligibility comes from the deployed `/comment-articles.json` manifest. Never expose pending comments or IP-derived rate keys through public APIs.
+Follow [COMMENTS_SETUP.md](COMMENTS_SETUP.md) for D1/Turnstile activation, Access protections, live checks, privacy, moderation, backup, and recovery. Visitor comments live in the `COMMENTS_DB` D1 binding, not Git. Apply `migrations/0001_journal_comments.sql` before enabling submissions and `migrations/0002_comment_replies.sql` once before deploying replies. A parent must be approved and on the same article; only one reply level is allowed. Hiding a parent hides its thread, and deleting a parent permanently deletes its replies. Existing Access configuration protects **Content → Comments** through `/admin/api/comments`; keep the reader endpoint `/api/comments` public. Article eligibility comes from the deployed `/comment-articles.json` manifest. Never expose pending comments or IP-derived rate keys through public APIs.
 
 ## 12. Documentation maintenance
 

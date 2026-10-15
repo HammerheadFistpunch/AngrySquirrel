@@ -107,17 +107,39 @@ const nextPage = (rows, limit) => {
     return { comments, nextCursor: rows.length > limit && last ? btoa(JSON.stringify([last.created_at, last.id])) : null };
 };
 
+const parseParentId = (value) => {
+    if (value === undefined || value === null || value === '') return null;
+    if (typeof value !== 'string' || !/^[a-f0-9-]{36}$/.test(value)) throw new CommentError('Invalid reply target.');
+    return value;
+};
+
+async function requireReplyParent(db, article, parentId) {
+    const { results } = await db.prepare(`
+        SELECT id FROM journal_comments WHERE id = ? AND article = ? AND status = 'approved' AND parent_id IS NULL
+    `).bind(parentId, article).all();
+    if (!results.length) throw new CommentError('That comment is no longer available for replies. Reload the discussion.', 404);
+}
+
 export async function getPublicComments(context) {
     const url = new URL(context.request.url);
     const article = parseArticle(url.searchParams.get('article'));
+    const parentId = parseParentId(url.searchParams.get('parent'));
     await publishedArticle(context, article);
     if (!context.env.COMMENTS_DB) return commentJson({ comments: [], nextCursor: null, accepting: false });
+    const db = dbFor(context.env);
+    if (parentId) await requireReplyParent(db, article, parentId);
     const cursor = parseCursor(url.searchParams.get('cursor'));
-    const { results } = await dbFor(context.env).prepare(`
-        SELECT id, name, body, created_at FROM journal_comments
-        WHERE article = ? AND status = 'approved' AND (created_at > ? OR (created_at = ? AND id > ?))
-        ORDER BY created_at, id LIMIT ?
-    `).bind(article, cursor.time, cursor.time, cursor.id, PAGE_SIZE + 1).all();
+    const { results } = await db.prepare(`
+        SELECT c.id, c.name, c.body, c.created_at, c.parent_id,
+            (SELECT COUNT(*) FROM journal_comments r WHERE r.parent_id = c.id AND r.article = c.article AND r.status = 'approved') AS reply_count
+        FROM journal_comments c
+        WHERE c.article = ? AND c.parent_id IS ? AND c.status = 'approved'
+          AND (c.parent_id IS NULL OR EXISTS (
+              SELECT 1 FROM journal_comments p WHERE p.id = c.parent_id AND p.article = c.article AND p.status = 'approved' AND p.parent_id IS NULL
+          ))
+          AND (c.created_at > ? OR (c.created_at = ? AND c.id > ?))
+        ORDER BY c.created_at, c.id LIMIT ?
+    `).bind(article, parentId, cursor.time, cursor.time, cursor.id, PAGE_SIZE + 1).all();
     return commentJson({ ...nextPage(results, PAGE_SIZE), accepting: submissionsEnabled(context.env),
         siteKey: submissionsEnabled(context.env) ? context.env.COMMENTS_TURNSTILE_SITE_KEY : undefined });
 }
@@ -145,6 +167,9 @@ export async function submitPublicComment(context) {
     if (input.website) throw new CommentError('The comment could not be submitted.');
     const comment = validateComment(input);
     await publishedArticle(context, comment.article);
+    const parentId = parseParentId(input.parentId);
+    const db = dbFor(env);
+    if (parentId) await requireReplyParent(db, comment.article, parentId);
     const ip = request.headers.get('cf-connecting-ip');
     if (!ip) throw new CommentError('Comments are temporarily unavailable.', 503);
     await verifyCommentChallenge(env, request, comment.token);
@@ -154,15 +179,21 @@ export async function submitPublicComment(context) {
         { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
     const signature = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(`${Math.floor(now / 86400000)}:${ip}`));
     const rateKey = Array.from(new Uint8Array(signature), byte => byte.toString(16).padStart(2, '0')).join('');
-    const result = await dbFor(env).prepare(`
-        INSERT INTO journal_comments (id, article, name, body, status, created_at, rate_key)
-        SELECT ?, ?, ?, ?, 'pending', ?, ?
+    const result = await db.prepare(`
+        INSERT INTO journal_comments (id, article, name, body, status, created_at, rate_key, parent_id)
+        SELECT ?, ?, ?, ?, 'pending', ?, ?, ?
         WHERE (SELECT COUNT(*) FROM journal_comments WHERE rate_key = ? AND created_at >= ?) < 3
           AND (SELECT COUNT(*) FROM journal_comments WHERE created_at >= ?) < 100
-    `).bind(crypto.randomUUID(), comment.article, comment.name, comment.body, now, rateKey,
-        rateKey, now - 600000, now - 600000).run();
-    if (!result.meta?.changes) throw new CommentError('Too many comments. Please try again in ten minutes.', 429);
-    return commentJson({ message: 'Thank you. Your comment is waiting for approval.' }, 202);
+          AND (? IS NULL OR EXISTS (
+              SELECT 1 FROM journal_comments WHERE id = ? AND article = ? AND status = 'approved' AND parent_id IS NULL
+          ))
+    `).bind(crypto.randomUUID(), comment.article, comment.name, comment.body, now, rateKey, parentId,
+        rateKey, now - 600000, now - 600000, parentId, parentId, comment.article).run();
+    if (!result.meta?.changes) {
+        if (parentId) await requireReplyParent(db, comment.article, parentId);
+        throw new CommentError('Too many comments. Please try again in ten minutes.', 429);
+    }
+    return commentJson({ message: parentId ? 'Thank you. Your reply is waiting for approval.' : 'Thank you. Your comment is waiting for approval.' }, 202);
 }
 
 export async function getModerationComments(context) {
@@ -172,9 +203,11 @@ export async function getModerationComments(context) {
     if (!statuses.has(status)) throw new CommentError('Invalid comment status.');
     const cursor = parseCursor(url.searchParams.get('cursor'));
     const { results } = await db.prepare(`
-        SELECT id, article, name, body, status, created_at, moderated_at FROM journal_comments
-        WHERE status = ? AND (created_at > ? OR (created_at = ? AND id > ?))
-        ORDER BY created_at, id LIMIT ?
+        SELECT c.id, c.article, c.name, c.body, c.status, c.created_at, c.moderated_at,
+            c.parent_id, p.name AS parent_name, p.body AS parent_body, p.status AS parent_status
+        FROM journal_comments c LEFT JOIN journal_comments p ON p.id = c.parent_id
+        WHERE c.status = ? AND (c.created_at > ? OR (c.created_at = ? AND c.id > ?))
+        ORDER BY c.created_at, c.id LIMIT ?
     `).bind(status, cursor.time, cursor.time, cursor.id, PAGE_SIZE + 1).all();
     return commentJson(nextPage(results, PAGE_SIZE));
 }
@@ -186,13 +219,17 @@ export async function moderateComment(context) {
     if (typeof input.id !== 'string' || !/^[a-f0-9-]{36}$/.test(input.id)) throw new CommentError('Invalid comment.');
     let result;
     if (context.request.method === 'DELETE') {
-        result = await db.prepare('DELETE FROM journal_comments WHERE id = ?').bind(input.id).run();
+        result = await db.prepare('DELETE FROM journal_comments WHERE id = ? OR parent_id = ?').bind(input.id, input.id).run();
     } else {
         if (!statuses.has(input.status)) throw new CommentError('Invalid comment status.');
-        result = await db.prepare('UPDATE journal_comments SET status = ?, moderated_at = ? WHERE id = ?')
-            .bind(input.status, Date.now(), input.id).run();
+        result = await db.prepare(`
+            UPDATE journal_comments AS c SET status = ?, moderated_at = ? WHERE c.id = ?
+            AND (? <> 'approved' OR c.parent_id IS NULL OR EXISTS (
+                SELECT 1 FROM journal_comments p WHERE p.id = c.parent_id AND p.article = c.article AND p.status = 'approved' AND p.parent_id IS NULL
+            ))
+        `).bind(input.status, Date.now(), input.id, input.status).run();
     }
-    if (!result.meta?.changes) throw new CommentError('Comment no longer exists. Refresh the list.', 404);
+    if (!result.meta?.changes) throw new CommentError('Comment or approved parent is unavailable. Refresh the list.', 404);
     return commentJson({ ok: true });
 }
 

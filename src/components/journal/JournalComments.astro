@@ -10,7 +10,8 @@ const { article } = Astro.props;
   <div data-list></div>
   <button type="button" data-more hidden>Load more comments</button>
   <form data-form hidden>
-    <h3>Leave a comment</h3>
+    <h3 data-form-heading>Leave a comment</h3>
+    <div data-reply-context hidden><p data-reply-label></p><button type="button" data-cancel-reply>Cancel reply</button></div>
     <label>Your name <input name="name" type="text" maxlength="60" autocomplete="nickname" required /></label>
     <label>Comment <textarea name="body" rows="5" maxlength="3000" required></textarea></label>
     <div class="comment-honeypot" aria-hidden="true">
@@ -26,7 +27,7 @@ const { article } = Astro.props;
 </section>
 
 <script>
-  interface CommentRow { id: string; name: string; body: string; created_at: number }
+  interface CommentRow { id: string; name: string; body: string; created_at: number; parent_id?: string | null; reply_count?: number }
   interface TurnstileAPI {
     render: (element: HTMLElement, options: Record<string, unknown>) => string;
     reset: (id: string) => void;
@@ -68,6 +69,19 @@ const { article } = Astro.props;
     let token = '';
     let widget: string | undefined;
     let submitting = false;
+    let accepting = false;
+    let replyTarget: string | null = null;
+    const formHeading = form.querySelector<HTMLElement>('[data-form-heading]')!;
+    const replyContext = form.querySelector<HTMLElement>('[data-reply-context]')!;
+    const replyLabel = form.querySelector<HTMLElement>('[data-reply-label]')!;
+    const cancelReply = form.querySelector<HTMLButtonElement>('[data-cancel-reply]')!;
+    const chooseReply = (comment?: CommentRow) => {
+      replyTarget = comment?.id ?? null;
+      replyContext.hidden = !comment;
+      formHeading.textContent = comment ? `Reply to ${comment.name}` : 'Leave a comment';
+      replyLabel.textContent = comment ? `Replying to: ${comment.body.slice(0, 160)}${comment.body.length > 160 ? '…' : ''}` : '';
+    };
+    cancelReply.addEventListener('click', () => { if (!submitting) { chooseReply(); body.focus(); } });
     const shown = new Set<string>();
 
     const read = async (response: Response) => {
@@ -77,21 +91,84 @@ const { article } = Astro.props;
       return data;
     };
     const invalidateChallenge = () => { token = ''; submit.disabled = true; };
+    const renderComment = (comment: CommentRow, isReply = false) => {
+      const item = document.createElement('article');
+      item.id = `comment-${comment.id}`;
+      item.className = isReply ? 'journal-comment journal-comment-reply' : 'journal-comment';
+      const heading = document.createElement('h3');
+      heading.textContent = comment.name;
+      const date = document.createElement('time');
+      date.dateTime = new Date(comment.created_at).toISOString();
+      date.textContent = new Date(comment.created_at).toLocaleDateString(undefined, { dateStyle: 'medium' });
+      const text = document.createElement('p');
+      text.textContent = comment.body;
+      item.append(heading, date, text);
+      if (isReply) return item;
+      if (accepting) {
+        const reply = document.createElement('button');
+        reply.type = 'button'; reply.className = 'comment-reply-button'; reply.textContent = 'Reply';
+        reply.setAttribute('aria-label', `Reply to ${comment.name}`);
+        reply.addEventListener('click', () => {
+          if (submitting) return;
+          chooseReply(comment);
+          form.scrollIntoView({ block: 'nearest', behavior: 'auto' });
+          body.focus();
+        });
+        item.append(reply);
+      }
+      if (comment.reply_count) {
+        const toggle = document.createElement('button');
+        toggle.type = 'button'; toggle.textContent = `View replies (${comment.reply_count})`;
+        toggle.className = 'comment-replies-toggle';
+        toggle.setAttribute('aria-expanded', 'false');
+        const thread = document.createElement('div');
+        thread.className = 'comment-replies'; thread.hidden = true;
+        thread.id = `replies-${comment.id}`;
+        thread.setAttribute('role', 'group'); thread.setAttribute('aria-label', `Replies to ${comment.name}`);
+        toggle.setAttribute('aria-controls', thread.id);
+        const replyList = document.createElement('div');
+        const replyNotice = document.createElement('p'); replyNotice.setAttribute('role', 'status');
+        const next = document.createElement('button'); next.type = 'button'; next.textContent = 'Load more replies'; next.hidden = true;
+        thread.append(replyNotice, replyList, next);
+        const seenReplies = new Set<string>();
+        let replyCursor: string | null = null;
+        let loaded = false;
+        let loading = false;
+        const loadReplies = async () => {
+          if (loading) return;
+          loading = true; next.disabled = true; toggle.disabled = true;
+          replyNotice.textContent = 'Loading replies…';
+          try {
+            const query = new URLSearchParams({ article, parent: comment.id });
+            if (replyCursor) query.set('cursor', replyCursor);
+            const data = await read(await fetch(`/api/comments?${query}`, { cache: 'no-store', signal: AbortSignal.timeout(15000) }));
+            for (const row of data.comments as CommentRow[]) {
+              if (seenReplies.has(row.id)) continue;
+              seenReplies.add(row.id); replyList.append(renderComment(row, true));
+            }
+            loaded = true; replyCursor = data.nextCursor; next.hidden = !replyCursor;
+            replyNotice.textContent = seenReplies.size ? '' : 'No approved replies yet.';
+          } catch (error) {
+            replyNotice.textContent = error instanceof Error && error.name !== 'TimeoutError' ? error.message : 'Replies are taking too long to load. Please try again.';
+            next.hidden = false; next.textContent = 'Retry loading replies';
+          } finally { loading = false; next.disabled = false; toggle.disabled = false; }
+        };
+        toggle.addEventListener('click', () => {
+          thread.hidden = !thread.hidden;
+          toggle.setAttribute('aria-expanded', String(!thread.hidden));
+          toggle.textContent = thread.hidden ? `View replies (${comment.reply_count})` : 'Hide replies';
+          if (!thread.hidden && !loaded) void loadReplies();
+        });
+        next.addEventListener('click', () => { next.textContent = 'Load more replies'; void loadReplies(); });
+        item.append(toggle, thread);
+      }
+      return item;
+    };
     const draw = (comments: CommentRow[]) => {
       for (const comment of comments) {
         if (shown.has(comment.id)) continue;
         shown.add(comment.id);
-        const item = document.createElement('article');
-        item.className = 'journal-comment';
-        const heading = document.createElement('h3');
-        heading.textContent = comment.name;
-        const date = document.createElement('time');
-        date.dateTime = new Date(comment.created_at).toISOString();
-        date.textContent = new Date(comment.created_at).toLocaleDateString(undefined, { dateStyle: 'medium' });
-        const text = document.createElement('p');
-        text.textContent = comment.body;
-        item.append(heading, date, text);
-        list.append(item);
+        list.append(renderComment(comment));
       }
     };
     const fetchComments = async (append = false) => {
@@ -102,6 +179,7 @@ const { article } = Astro.props;
         if (append && cursor) query.set('cursor', cursor);
         const data = await read(await fetch(`/api/comments?${query}`, { cache: 'no-store', signal: AbortSignal.timeout(15000) }));
         if (!append) { shown.clear(); list.replaceChildren(); }
+        accepting = Boolean(data.accepting);
         draw(data.comments);
         cursor = data.nextCursor;
         more.hidden = !cursor;
@@ -132,20 +210,20 @@ const { article } = Astro.props;
     form.addEventListener('submit', async event => {
       event.preventDefault();
       if (!token || submitting || !form.reportValidity()) return;
-      submitting = true; submit.disabled = true;
+      submitting = true; submit.disabled = true; cancelReply.disabled = true;
       formNotice.textContent = 'Submitting…';
       try {
         const data = await read(await fetch('/api/comments', {
           method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ article, name: name.value, body: body.value, website: website.value, token }),
+          body: JSON.stringify({ article, name: name.value, body: body.value, website: website.value, token, parentId: replyTarget }),
           signal: AbortSignal.timeout(15000),
         }));
-        body.value = ''; website.value = '';
+        body.value = ''; website.value = ''; chooseReply();
         formNotice.textContent = data.message;
       } catch (error) {
         formNotice.textContent = error instanceof Error && error.name !== 'TimeoutError' ? error.message : 'The request timed out. Your text is still here. Wait before retrying to avoid a duplicate submission.';
       } finally {
-        submitting = false;
+        submitting = false; cancelReply.disabled = false;
         invalidateChallenge();
         if (widget !== undefined) commentWindow.turnstile?.reset(widget);
       }
@@ -170,6 +248,12 @@ const { article } = Astro.props;
   .journal-comments [hidden] { display: none !important; }
   .journal-comments :global(.journal-comment) { padding: 1.25rem 0; border-bottom: 1px solid var(--border-color); }
   .journal-comments :global(.journal-comment h3) { margin-bottom: .25rem; font: 700 1rem var(--font-ui); overflow-wrap: anywhere; }
+  .journal-comments :global(.comment-reply-button),
+  .journal-comments :global(.comment-replies-toggle),
+  .journal-comments :global(.comment-replies button) { margin: .75rem .75rem 0 0; padding: .4rem .75rem; border: 1px solid var(--accent); border-radius: var(--radius-sm); background: transparent; color: var(--accent); font: inherit; cursor: pointer; }
+  .journal-comments :global(.comment-replies button:disabled) { opacity: .6; cursor: wait; }
+  .journal-comments :global(.comment-replies) { margin-top: 1rem; padding-left: clamp(.75rem, 3vw, 1.5rem); border-left: 2px solid var(--border-color); }
+  .journal-comments :global(.comment-replies[hidden]) { display: none !important; }
   .journal-comments :global(.journal-comment time) { font-size: .85rem; color: var(--text-secondary); }
   .journal-comments :global(.journal-comment p) { white-space: pre-wrap; overflow-wrap: anywhere; margin: .75rem 0 0; font: 1rem/1.6 var(--font-ui); }
 </style>

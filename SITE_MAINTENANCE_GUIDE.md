@@ -26,6 +26,8 @@ Do not overwrite newer Tina content with an older local checkout.
 | `src/content.config.ts` | Astro content validation |
 | `tina/config.ts` | Tina collections, fields, navigation behavior |
 | `tina/components/` | custom Tina controls, Markdown editor, Immich picker, import UI |
+| `tina/components/FieldNoteScreen.tsx` | mobile quick composer; existing Tina content/media APIs and publish relay |
+| `tina/lib/fieldNote.ts` | plain-text escaping, metadata defaults, persistent note identity, save recovery |
 | `tina/tina-lock.json` | generated Tina schema lock; never hand-edit |
 | `src/pages/` | public routes and route-generation logic |
 | `src/layouts/` | shared page/entry presentation |
@@ -41,6 +43,14 @@ Do not overwrite newer Tina content with an older local checkout.
 | `tests/` | authoring/import/schema regression tests |
 
 See `SITE_MAP.md` for the public/Tina/source relationship.
+
+### Quick Field Note
+
+The authenticated Tina screen route is `/admin/#/screens/quick_field_note` (Tina screen slugs use underscores). It creates normal `entries` documents with UUID-based filenames, validates the active `field-notes` section, and uses the configured Tina media store for JPEG uploads. No collection or lockfile change is required.
+
+Local backup uses `angrysquirrel.quick-field-note.v1` in browser localStorage; storage errors do not prevent saving to Tina. Images are decoded, resized, and re-encoded in-browser before upload. Save failures retain the form. If a save response is lost, the same document is read and compared before accepting recovery. A saved public note requests the existing Access-protected `/admin/api/publish` relay; failures offer a retry without creating another entry. Publishing still releases the entire saved branch.
+
+Verification includes `tests/field-note.test.mjs` for metadata, MDX-safe literal text, portable photos, backup validation, and lost-response recovery. `DOCUMENTATION.md`, `PROJECT_LOG.md`, and `BUILD_ORDER.md` referenced by AGENTS.md are absent from this branch; HELP, Roadmap, and this guide remain the available workflow references.
 
 ## 3. Local setup and checks
 

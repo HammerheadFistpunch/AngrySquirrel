@@ -1,6 +1,6 @@
 # GTP_Port Roadmap
 
-Last updated: 2026-08-20
+Last updated: 2026-10-22
 
 ## Product direction
 
@@ -12,6 +12,14 @@ AngrySquirrel.org is intended to remain a fast, low-maintenance personal site wi
 The durable architecture is Astro + Git-backed Markdown/MDX + TinaCMS, deployed on Cloudflare. Immich remains the private source media library while selected website assets are copied to R2 for public delivery.
 
 ## Current state
+
+### Mobile Field Notes (2026-10-22)
+
+- Added **Content → Quick Field Note**, a focused mobile composer using the existing Tina login and Journal schema.
+- Plain-text notes receive automatic title, summary, date, and Field Notes section; optional native photo uploads are resized before storage.
+- Browser backup protects unfinished notes; save retries retain the same document identity.
+- Publish saves and requests the existing site build; Save Draft stays unpublished. Build failures retain the saved entry and offer publishing retry.
+- No schema changes or new service credentials are required.
 
 The core platform is operational:
 

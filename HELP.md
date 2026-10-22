@@ -23,6 +23,7 @@ Current owner navigation:
 - **Content**
   - Journal
   - Journal Sections
+  - Quick Field Note
   - Import
 - **Media**
   - Media Manager
@@ -43,6 +44,22 @@ Normal workflow:
 If Saved and Live match, there is nothing new to publish.
 
 ## 3. Journal entries
+
+### Quick posts from your phone
+
+Open **Content → Quick Field Note**, or bookmark
+`https://angrysquirrel.org/admin/#/screens/quick_field_note` on your phone's home screen.
+Sign in with your usual editor account.
+
+1. Type a note or dictate with your phone keyboard's microphone.
+2. Optionally tap **Add photos** and choose up to six photos from your phone. The first photo becomes the cover; photo descriptions are optional.
+3. Tap **Publish** to save the note and request the site build, or **Save Draft** to finish later in Journal.
+
+The date, Field Notes section, title (opening line), and summary are automatic. **More options** lets you supply a title. This composer treats the note as plain text; use the full Journal editor for formatted articles, Topics, or other metadata.
+
+Text and uploaded-photo addresses are backed up in this browser until saving succeeds. Keep the screen open while photos upload. Photos are resized to at most 2,000 pixels on the long side and re-encoded as JPEG before upload. If your browser cannot decode HEIC, select a JPEG instead.
+
+**Publish releases all saved site changes**, just like Publish Site. The note becomes public after the build succeeds. If publishing fails after saving, use **Retry publishing**; the saved note is kept. Use **Check publishing status** to follow the build. Drafts remain unpublished and can be edited under Journal. Uploaded photos are public media, including photos attached to drafts.
 
 Every item under **Content → Journal** uses the same Journal model.
 

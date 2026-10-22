@@ -3,6 +3,7 @@ import type { TinaCMS } from "tinacms";
 import { CommentsScreen } from "./CommentsScreen";
 import { PublishSiteScreen } from "./PublishSite";
 import { ImportEntryScreen } from "./ImportEntryScreen";
+import { FieldNoteScreen } from "./FieldNoteScreen";
 
 type NavigationCategory = "Settings" | "Pages" | "Content" | "Media" | "Site";
 
@@ -166,6 +167,13 @@ export const installAdminNavigation = (cms: TinaCMS) => {
             Icon: NavigationIcon,
             layout: "fullscreen",
             navCategory: item.category,
+        } as never);
+    }
+
+    if (!screens.some((screen) => screen.name === "Quick Field Note")) {
+        cms.plugins.add({
+            __type: "screen", name: "Quick Field Note", Component: FieldNoteScreen,
+            Icon: NavigationIcon, layout: "fullscreen", navCategory: "Content",
         } as never);
     }
 

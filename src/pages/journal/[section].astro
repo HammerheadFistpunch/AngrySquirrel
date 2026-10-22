@@ -1,5 +1,6 @@
 ---
 import { getCollection, getEntry } from "astro:content";
+import { sortJournalEntries } from "../../lib/journal-order";
 import JournalLanding, { type JournalPostSummary } from "../../components/journal/JournalLanding.astro";
 import {
   createJournalSectionRegistry,
@@ -37,9 +38,9 @@ if (!journalPage || journalPage.data.pageType !== "archive") {
 const page = journalPage.data;
 const tagRegistry = createTagRegistry(await getCollection("tags"));
 const dateFormatter = new Intl.DateTimeFormat("en-US", { dateStyle: "long", timeZone: "UTC" });
-const entries = (await getCollection("entries", ({ data }) =>
+const entries = sortJournalEntries(await getCollection("entries", ({ data }) =>
   !data.draft && journalSectionMatches(data.journalSection, section)
-)).sort((a, b) => (b.data.date?.getTime() ?? 0) - (a.data.date?.getTime() ?? 0));
+));
 
 const posts: JournalPostSummary[] = entries.map((entry) => ({
   title: entry.data.title,
@@ -49,6 +50,7 @@ const posts: JournalPostSummary[] = entries.map((entry) => ({
   section: section.label,
   href: `/archive/${entry.id}/`,
   tags: resolveTagReferences(entry.data.tags, tagRegistry, entry.data.title),
+  pinned: entry.data.pinned,
 }));
 ---
 
@@ -64,3 +66,4 @@ const posts: JournalPostSummary[] = entries.map((entry) => ({
   activeSection={section.slug}
   {canonicalPath}
 />
+

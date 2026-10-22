@@ -1,6 +1,7 @@
 ---
 import { getCollection, getEntry } from "astro:content";
 import { selectFeaturedJournalEntry } from "../../lib/featured-journal";
+import { sortJournalEntries } from "../../lib/journal-order";
 import JournalLanding, { type JournalPostSummary } from "../../components/journal/JournalLanding.astro";
 import { createJournalSectionRegistry, resolveJournalSection } from "../../lib/journal-sections";
 import { createTagRegistry, resolveTagReferences } from "../../lib/tags";
@@ -27,11 +28,12 @@ const summarize = (entry: (typeof entries)[number]): JournalPostSummary => ({
   section: resolveJournalSection(entry.data.journalSection, sectionRegistry)?.label ?? "Latest",
   href: `/archive/${entry.id}/`,
   tags: resolveTagReferences(entry.data.tags, tagRegistry, entry.data.title),
+  pinned: entry.data.pinned,
 });
 
 const featuredEntry = selectFeaturedJournalEntry(entries, page.featuredEntry);
 const featuredPost = featuredEntry ? summarize(featuredEntry) : undefined;
-const posts = entries.filter((entry) => entry.id !== featuredEntry?.id).map(summarize);
+const posts = sortJournalEntries(entries.filter((entry) => entry.id !== featuredEntry?.id)).map(summarize);
 ---
 
 <JournalLanding
@@ -45,3 +47,4 @@ const posts = entries.filter((entry) => entry.id !== featuredEntry?.id).map(summ
   posts={posts}
   sections={sectionRegistry.active}
 />
+

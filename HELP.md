@@ -127,6 +127,12 @@ The underlying collection is still named `tags` and public Topic pages remain `/
 
 Set **Featured Journal Story** under **Content → Journal Homepage** once. Both the main homepage preview and Journal homepage use this selection. Leave it blank to feature the newest published story. Draft or missing selections also fall back to the newest published story; no published stories means no featured tile. The main homepage's Journal Preview Section controls presentation and recent-story count only.
 
+## Pinned Journal posts
+
+Open **Content → Journal**, edit a post, and turn on **Pin in Journal**. You can pin any number of posts. Save, then use **Settings → Publish Site** to make the changes live.
+
+Pinned published posts appear above unpinned posts on the Journal page and within their Journal Section, with newest first in each group. Cards show a **Pinned** label. Turn the checkbox off to return a post to its normal date order. Drafts remain private. The featured story stays separate at the top of the Journal page and is not repeated in the list; pinning does not change the homepage preview.
+
 ## Journal comments
 
 Readers can leave a name and plain-text comment without an account or email. Comments stay private until you approve them under **Content → Comments**. Readers can use **Reply** beneath approved comments; replies appear one level beneath their parent and also need approval. The moderation screen shows the original comment for context. That screen also lets you reject/hide or permanently delete comments. Hiding a parent hides its replies; deleting a parent deletes its replies. Approval is live; no Publish Site action is needed for moderation.
@@ -443,3 +449,4 @@ Add a redirect first, then change the public route/path. Do not silently break e
 ### An R2 image is no longer needed
 
 Do not delete it casually. Search the repository first because old revisions are intentionally immutable and existing Markdown may still reference them.
+

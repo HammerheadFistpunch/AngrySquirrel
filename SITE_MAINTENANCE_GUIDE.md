@@ -319,6 +319,8 @@ Periodically verify:
 
 ## Featured Journal selection
 
+Entries have an optional `pinned` boolean (default false). `src/lib/journal-order.ts` sorts published Journal and Section lists by pin status, then descending date, then ID for ties. The feature is removed from the main list before sorting to avoid duplication. Keep homepage recent stories, RSS, Topic archives, and the shared featured selector on their existing chronology. Regenerate the Tina lock with tooling after changing this field.
+
 `src/content/pages/journal.md` owns `featuredEntry`. Both homepages use `src/lib/featured-journal.ts` to resolve references and select only published stories, with the newest published entry as fallback. Do not add a second featured-story setting to `home.md` or its Tina schema. Update the shared selector and its tests if selection behavior changes.
 
 ## Journal comment operations
@@ -337,3 +339,4 @@ Keep only these durable project docs current:
 - `COMMENTS_SETUP.md`
 
 When a feature changes, update the appropriate durable guide in the same change. Implementation history belongs in Git commits/issues rather than permanent sprint logs.
+

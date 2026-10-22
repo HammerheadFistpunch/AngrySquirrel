@@ -41,6 +41,10 @@ The core platform is operational:
 
 Journal Homepage owns the featured-story selection for both `/` and `/journal/`. Removed the duplicate main-homepage field and content value. Both surfaces resolve Tina references consistently and fall back to the newest published story when the selection is empty, missing, or a draft.
 
+## Multiple pinned Journal posts (2026-10-21)
+
+Journal entries now expose **Pin in Journal**. Any number of published posts can stay above unpinned entries on the Journal landing page and within their Section, newest first in each group, with a Pinned label. Featured-story selection and homepage recency remain independent.
+
 ## Active priorities
 
 ### 1. Page-header simplification and homepage identity
@@ -197,3 +201,4 @@ A feature is complete when applicable items are true:
 - redirects are added for changed public URLs
 - security-sensitive endpoints are tested for both allowed and denied access when authentication changes
 - the relevant durable documentation above is updated
+

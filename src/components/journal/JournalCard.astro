@@ -11,6 +11,7 @@ interface Props {
   href: string;
   variant?: "default" | "editorial";
   tags?: ResolvedTag[];
+  pinned?: boolean;
 }
 
 const {
@@ -22,6 +23,7 @@ const {
   href,
   variant = "default",
   tags = [],
+  pinned = false,
 } = Astro.props;
 ---
 
@@ -43,7 +45,7 @@ const {
 
   <div class="content">
 
-    <div class="meta">{category}</div>
+    <div class="meta">{pinned && <span>Pinned · </span>}{category}</div>
 
     <h3>
       <a href={href}>{title}</a>
@@ -217,3 +219,4 @@ const {
 }
 
 </style>
+

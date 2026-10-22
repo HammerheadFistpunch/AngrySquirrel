@@ -15,6 +15,7 @@ export interface JournalPostSummary {
   section: string;
   href: string;
   tags: ResolvedTag[];
+  pinned?: boolean;
 }
 
 interface Props {
@@ -93,6 +94,7 @@ const sectionLinks = [
                 href={post.href}
                 variant="editorial"
                 tags={post.tags}
+                pinned={post.pinned}
               />
             ))}
           </div>
@@ -132,3 +134,4 @@ const sectionLinks = [
   .story-list { max-width: 68rem; }
   @media (max-width: 800px) { .journal-shell { padding-top: var(--space-md); } }
 </style>
+

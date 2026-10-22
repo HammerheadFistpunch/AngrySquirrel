@@ -453,6 +453,7 @@ export default defineConfig({
                     { type: "string", name: "body", label: "Entry Content (Markdown)", description: "Write portable Markdown. Use the toolbar for formatting, links, Immich/R2, managed/external images, and YouTube embeds.", required: true, isBody: true, ui: { component: MarkdownBodyField } },
                     { type: "string", name: "journalSection", label: "Journal Section", description: "Choose one active section, or leave blank for Latest only.", ui: { component: JournalSectionField } },
                     { type: "boolean", name: "commentsDisabled", label: "Disable Comments", description: "Hide the discussion and stop new comments on this entry after publishing. Leave off to allow moderated comments." },
+                    { type: "boolean", name: "pinned", label: "Pin in Journal", description: "Keep this published post above unpinned posts on the Journal page and in its section. Pin as many posts as you like; pinned posts appear newest first. The featured story is selected separately." },
                     { type: "boolean", name: "draft", label: "Status", description: "Choose whether this story is public.", ui: { component: PublicationStatusField } },
                     {
                         type: "object",
@@ -476,3 +477,4 @@ export default defineConfig({
         ],
     },
 });
+

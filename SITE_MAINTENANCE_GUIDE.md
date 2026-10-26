@@ -1,6 +1,6 @@
 # AngrySquirrel.org Site Maintenance Guide
 
-This guide is for code, deployment, infrastructure, schema, security, and recovery work. Owner editing instructions live in `HELP.md`.
+This guide is for code, deployment, infrastructure, schema, security, and recovery work. Owner editing instructions live in `HELP.md`. For step-by-step PowerShell update instructions, see [section 13](#13-updating-the-site-and-its-dependencies-powershell).
 
 ## 1. Maintenance rule: start from the remote branch
 
@@ -350,3 +350,295 @@ Keep only these durable project docs current:
 
 When a feature changes, update the appropriate durable guide in the same change. Implementation history belongs in Git commits/issues rather than permanent sprint logs.
 
+## 13. Updating the site and its dependencies (PowerShell)
+
+Use this section for routine updates. These instructions assume Windows PowerShell or PowerShell 7. Run commands **one line at a time** and stop if an update or validation command fails. PowerShell does not always stop automatically when an external command fails. `npm outdated` returning a list/nonzero exit code is an expected exception: it is a report, not a failed installation.
+
+### What gets updated where?
+
+| Component | Where to update it | What an interruption affects |
+| --- | --- | --- |
+| Immich server + machine learning | Home server, Immich Compose folder | Photo library and website picker |
+| Caddy | Same Compose folder | Photo/share access routed through Caddy |
+| cloudflared | Same Compose folder | Private website-to-Immich connection |
+| Immich Public Proxy | Same Compose folder | Shared albums and any galleries using them |
+| PostgreSQL + Valkey (`redis`) | Same Compose folder, following Immich release instructions | Immich and everything that depends on it |
+| TinaCMS + CLI + Astro integration | Local `GTP_Port` website checkout | Editor and site builds after deployment |
+| Astro + MDX integration | Local website checkout | Public site generation |
+| Other npm packages | Local website checkout | Depends on the package; test before publishing |
+| Node.js + npm | Development PC and Pages build configuration | Local/cloud builds |
+| Docker Desktop + WSL | Home server | All containers on that Docker installation |
+| Pages/Functions, Access, Tunnel service, R2, KV, D1, Turnstile, TinaCloud, GitHub | Provider-managed | No local server package to upgrade; maintain configuration, credentials, and usage |
+
+Published R2 images remain available when home-server services are offline. Public galleries that read Immich shares directly still depend on the home server. Updating Docker Desktop does **not** update container images; updating TinaCMS packages does **not** update the hosted TinaCloud service.
+
+### A. Before updating Docker services
+
+Open PowerShell **on the home server**. The recorded folder is `C:\IMMICH`; use your actual folder if it has moved. Stay in the same Compose project/folder so Docker reuses the existing configuration and volumes.
+
+```powershell
+Set-Location C:\IMMICH
+docker compose config --services
+docker compose ps
+docker compose images
+```
+
+The recorded service names are `immich-server`, `immich-machine-learning`, `database`, `redis`, `caddy`, `cloudflared`, and `immich-public-proxy`. Use the names printed by `config --services` if your configuration differs. Compose commands take **service names**, not container names such as `immich_server`.
+
+Before making changes:
+
+1. Note the working image versions from `docker compose images`.
+2. Make a dated copy of your Compose file, `.env`, and Caddy configuration into a private backup folder outside Git. Include any Compose override files. `.env` contains secrets.
+3. Before an Immich/database update, confirm you have a recent usable **database backup and original photo/video backup**, including external libraries. A copy of the Compose file is not a photo/database backup. Follow [Immich backup and restore](https://docs.immich.app/administration/backup-and-restore/); do not copy a running PostgreSQL data directory as your only backup.
+4. Read the target release notes before changing versions, especially when skipping releases.
+
+`pull` downloads the image; `up -d` replaces the running container when its image/configuration has changed. `restart` alone does not install the downloaded image. `--no-deps` keeps an individual update from starting/recreating its dependencies. No `docker compose down` is needed. Never use `down -v` or delete volumes as an update step.
+
+If an image uses a fixed version tag, pulling fetches that version, not a later version. Edit its `image:` tag first when intentionally changing versions. An `@sha256:...` digest pins the exact image even if the tag moves. Keep database/cache pins until an Immich-supported update calls for changing them.
+
+### B. Update cloudflared (website Immich picker connection)
+
+Your recorded image is `cloudflare/cloudflared:latest`. From the Immich folder:
+
+```powershell
+docker compose pull cloudflared
+docker compose up -d --no-deps cloudflared
+docker compose exec cloudflared cloudflared --version
+docker compose logs --tail 50 cloudflared
+```
+
+Look for `Registered tunnel connection`, then open **Choose from Immich** in Tina and browse/preview a photo. Check the connector is healthy in Cloudflare's Tunnel dashboard. Its token and hostname routes are reused; no new tunnel is needed. Expect a brief picker interruption during restart. For Docker, update the image rather than running `cloudflared update` inside the container.
+
+### C. Update Caddy (photo/share access)
+
+Your recorded image is `caddy:latest`. Preserve the existing Caddyfile mounts and certificate/data volumes.
+
+```powershell
+docker compose pull caddy
+docker compose up -d --no-deps caddy
+docker compose exec caddy caddy version
+docker compose logs --tail 50 caddy
+```
+
+Open `https://photos.angrysquirrel.org` and a known `https://share.angrysquirrel.org` album. Confirm HTTPS and the expected login/share behavior still work. If you later use a custom Caddy image with plugins, update/rebuild that custom image; replacing it with the stock image can remove required plugins.
+
+### D. Update Immich server and machine learning together
+
+1. Complete the database/media backups in A.
+2. Open [Immich releases](https://github.com/immich-app/immich/releases) and read the notes from your installed version through the intended version. Follow any required intermediate upgrades or Compose/database changes first.
+3. Review the mobile-app compatibility instructions for that release and update clients as required.
+4. Open your local `.env`:
+
+```powershell
+notepad .env
+```
+
+Find `IMMICH_VERSION`. If it contains a fixed version, set it to the exact stable release you chose (including the `v` prefix used by Immich tags). Save and close Notepad. If it is `release`, a pull follows the moving release tag; check the release notes before pulling. Prefer an explicit version when you want control over major upgrades. Do not change your upload/database paths or credentials.
+
+5. If release notes require Compose changes, merge them into your existing file. Do not overwrite your customized stack with the stock download: that would discard Caddy, cloudflared, the proxy, and local settings.
+6. For an application-only update with the existing database/cache still compatible and running, run:
+
+```powershell
+docker compose pull immich-server immich-machine-learning
+docker compose up -d --no-deps immich-server immich-machine-learning
+docker compose ps
+docker compose logs --tail 100 immich-server immich-machine-learning
+```
+
+If the release requires database/cache changes, use E first and follow the release's complete sequence instead of treating it as an application-only update. This targeted procedure avoids accidentally upgrading unrelated services in the shared stack.
+
+7. Allow startup/migrations to finish. Confirm the server version in Immich, open an existing photo/video, upload a test photo, and check the mobile app. In Tina, browse an album, preview an image, and publish/select a website copy. Open its R2 URL while signed out. An Immich API change can affect the picker even when Immich's own UI works.
+
+### E. Update PostgreSQL and Valkey (the `database` and `redis` services)
+
+These are Immich infrastructure, not independent “latest” upgrades. Your recorded stack pins a PostgreSQL/vector-extension image and a Valkey image by digest. Use the compatible images specified by the target Immich release. Do not replace them with generic `postgres:latest` or `redis:latest`, or change only PostgreSQL's major version.
+
+1. Back up the database and media, and keep the old Compose/configuration files.
+2. Read the target Immich database/migration instructions. A PostgreSQL major upgrade may require export/restore or another migration; changing the image alone is insufficient.
+3. Edit the relevant `image:` lines with the **complete compatible tag/digest** from those instructions.
+4. For a compatible image replacement where the instructions do not prescribe another sequence, stop Immich writers first, update infrastructure, and then restart the application:
+
+```powershell
+docker compose stop immich-server immich-machine-learning
+docker compose pull database redis
+docker compose up -d --no-deps database redis
+docker compose ps
+docker compose logs --tail 100 database redis
+```
+
+5. Wait until the database/cache are ready and healthy. If either fails, stop here and use the migration/recovery instructions. Once healthy:
+
+```powershell
+docker compose up -d --no-deps immich-server immich-machine-learning
+docker compose logs --tail 100 immich-server
+```
+
+Complete the checks in D. Do not interrupt a running database migration. Immich does not support routine downgrades; reverting the image after a schema migration may require restoring the pre-update database and matching application/configuration.
+
+### F. Update Immich Public Proxy (shared albums)
+
+Check [the proxy project/release notes](https://github.com/alangrainger/immich-public-proxy) for compatibility with your Immich version. Your recorded image uses `latest`.
+
+```powershell
+docker compose pull immich-public-proxy
+docker compose up -d --no-deps immich-public-proxy
+docker compose logs --tail 50 immich-public-proxy
+```
+
+Open a known shared album while signed out, then check any website gallery using that album. Only deliberately shared material should be visible.
+
+### G. Prepare the website checkout for package updates
+
+Use PowerShell on your development PC. This is the **website repository folder**, not `C:\IMMICH`. Enter the actual folder path when prompted:
+
+```powershell
+$siteFolder = Read-Host 'Full path to your GTP_Port checkout'
+Set-Location $siteFolder
+git status --short
+git remote -v
+```
+
+Confirm this is `HammerheadFistpunch/GTP_Port`. If status lists existing work, commit or otherwise preserve it before continuing; do not discard it. Then run:
+
+```powershell
+git fetch origin
+git switch gpt-handoff
+git pull --ff-only origin gpt-handoff
+$updateBranch = 'maintenance/dependencies-' + (Get-Date -Format 'yyyyMMdd-HHmmss')
+git switch -c $updateBranch
+node --version
+npm --version
+npm ci
+npm outdated
+```
+
+The repository currently requires Node `>=22.22.0`; also satisfy any higher requirement of the packages you intend to install. `npm ci` installs the committed versions reproducibly. In `npm outdated`, **Current** is installed, **Wanted** fits the declared version range, and **Latest** can include a breaking major release. A package with an exact version, such as `marked` or `yaml` in the current manifest, will not advance with a plain `npm update`.
+
+Update one related group below, then do J before moving to another group. Read migration notes before using `@latest`, which may cross a major version. Do not use `npm audit fix --force` or `--legacy-peer-deps` to bypass an unexplained compatibility failure.
+
+### H. Update TinaCMS, its CLI, and Astro integration
+
+Read [Tina's upgrade guide](https://tina.io/docs/guides/upgrade-to-latest-version). Upgrade `tinacms` and `@tinacms/cli` together; their version numbers do not have to match. Check that `@tinacms/astro` supports the chosen Tina/Astro versions.
+
+For routine updates within the existing declared ranges:
+
+```powershell
+npm update tinacms @tinacms/cli @tinacms/astro
+npm run dev
+```
+
+For an intentional move to the latest releases, after checking their migration/compatibility notes, use this **instead of** the `npm update` command:
+
+```powershell
+npm install tinacms@latest @tinacms/cli@latest @tinacms/astro@latest
+```
+
+Then run `npm run dev`. Use the Tina-aware server, open its `/admin/` editor, and allow Tina to regenerate `tina/tina-lock.json`. Test editing, the Markdown toolbar, Quick Field Note, and the Immich picker. Press **Ctrl+C** when finished.
+
+Review and commit the generated schema lock with `package.json`/`package-lock.json` changes. Never edit the lock manually. Complete J before publishing. If the deployed editor reports **GraphQL Schema Mismatch**, confirm the updated schema/lock are committed to `gpt-handoff`, let TinaCloud finish indexing that branch, then reload. Use the available TinaCloud reindex action if needed; reindexing alone cannot fix a stale committed lock.
+
+### I. Update Astro/MDX and the other npm dependencies
+
+For routine Astro updates within the declared ranges:
+
+```powershell
+npm update astro @astrojs/mdx
+```
+
+For an intentional latest-version upgrade, read [Astro's upgrade guides](https://docs.astro.build/en/upgrade-astro/) and use `npx @astrojs/upgrade` **instead**. It updates Astro and official integrations together. Check Tina's Astro integration compatibility before accepting a major upgrade.
+
+The remaining direct dependencies in the current `package.json` are:
+
+| Package/group | Update approach |
+| --- | --- |
+| `@cloudflare/pages-plugin-cloudflare-access` | `npm update @cloudflare/pages-plugin-cloudflare-access` within its current range; verify Access/admin APIs afterward |
+| `marked`, `yaml` | Currently exact pins; after reviewing release notes, run `npm install marked@latest` or `npm install yaml@latest`, one at a time, and review the new pin/range |
+| `@types/node`, `@types/react` | Update declarations compatible with the project's runtime/framework versions; `npm update @types/node @types/react` stays within declared ranges |
+| Nested/transitive packages | Normally updated through their parent packages and `package-lock.json`; review `npm audit` findings rather than adding arbitrary direct dependencies |
+
+For a planned broad refresh within all currently declared ranges, `npm update` is available, but it can affect several groups at once and leaves exact pins unchanged. Complete the full checks below. `npm install`/`npm update` change the lockfile; deleting it is not a routine update step.
+
+### J. Test, commit, and deliberately publish website updates
+
+Run these separately, stopping at the first failed check:
+
+```powershell
+npm run test:authoring
+npx tsc --noEmit
+npm run build
+git diff --check
+git diff --stat
+git status --short
+```
+
+The full build needs the existing TinaCloud environment variables. Keep `.env` and `TINA_TOKEN` private. `npm run build:astro` is useful for isolated diagnosis, but does not replace Tina/full-build checks for a dependency upgrade.
+
+Review the package/lock diffs and any migration changes. Stage only the intended files (include other reviewed migration files if needed):
+
+```powershell
+git add package.json package-lock.json tina/tina-lock.json
+git diff --cached --stat
+git commit -m 'Update site dependencies'
+git push -u origin $updateBranch
+```
+
+Use your existing Git credentials or ask ChatGPT to publish through the connected GitHub App; no new GitHub CLI login is required for that workflow. On GitHub, create a pull request from the maintenance branch into **`gpt-handoff`**. Review/merge it after checks pass, preserving any newer Tina content. Then:
+
+1. Wait for TinaCloud to index `gpt-handoff` and verify the editor loads.
+2. Use **Settings → Publish Site** (or the existing deliberate Cloudflare deploy hook if the editor itself is broken). A Git push/merge alone is not intended to rebuild production.
+3. Confirm the Pages deployment succeeds and `/deployment.json` reports the intended deployed commit. Publishing releases all saved branch changes, including newer Tina content.
+4. Check homepage, Journal, an article, `/admin/`, picker browse/preview/R2 publication, and comments/moderation if the update touches them. Public comments must work signed out; admin APIs must still require Access.
+
+If a build fails, the previous successful Pages deployment stays live. Fix the failure before republishing. If an update deploys but breaks the site, roll back to the prior successful Pages deployment for immediate recovery, then revert the specific dependency change through GitHub and deliberately publish the corrected branch. Do not reset/force-push an old branch snapshot over newer content. Remember that a Pages rollback does not restore D1 data or reverse database migrations.
+
+### K. Update Node.js and npm
+
+1. Run `node --version` and `npm --version` on the development PC.
+2. Use your existing Node installation method. For a normal Windows installer installation, download a supported **LTS Windows installer** from [nodejs.org](https://nodejs.org/en/download). If you use a version manager, update through that manager instead of mixing installations.
+3. Close/reopen PowerShell and verify the versions again. npm is bundled with Node; a separate global “latest npm” upgrade is not normally needed.
+4. In the website folder, run `npm ci` and the checks in J.
+5. Check the Pages build's Node selection (`NODE_VERSION` or the project's chosen version-file mechanism) uses the same supported major version. Update it deliberately and deploy/test; changing Node on your PC does not change Cloudflare's build runtime. Update the repository's engine requirement only when intentionally changing the supported minimum.
+
+### L. Update Docker Desktop and WSL
+
+This affects every Docker stack on the server, including projects outside this website.
+
+1. Finish backups and pick a time when the home services can be offline.
+2. Open Docker Desktop and use its update notification or **Check for updates**, then apply/restart as requested.
+3. If WSL needs updating, run PowerShell as administrator:
+
+```powershell
+wsl --update
+wsl --version
+```
+
+4. Reboot if requested, start Docker Desktop, and wait until its engine is running. Then check:
+
+```powershell
+docker version
+docker compose version
+Set-Location C:\IMMICH
+docker compose ps
+```
+
+If stack services did not restart, run `docker compose up -d` from their existing project folder. Check photo/share access and the picker again. Avoid `wsl --shutdown` while services are in use: it stops the WSL environment used by Docker.
+
+### M. Cloudflare/TinaCloud/GitHub services and comment storage
+
+There is no local upgrade command for Pages hosting/Functions runtime, Access, R2, KV, D1, Turnstile, TinaCloud, or GitHub. Providers update these services. Your responsibilities are package compatibility, build settings, bindings, credentials, migrations, backups, and checking provider notices.
+
+- **Pages/Functions and Access:** keep production deployments deliberate, preserve existing bindings/secrets, and verify owner-only admin/publish/media access after a configuration/runtime change. Update the npm Access plugin using I, not by changing Access policies at random.
+- **Tunnel:** Cloudflare manages the hosted service; you update the local `cloudflared` connector using B.
+- **R2/KV:** preserve bucket/binding names and immutable media URLs. Do not delete old R2 objects or recreate stores as an update step.
+- **D1/comments:** follow [COMMENTS_SETUP.md](COMMENTS_SETUP.md) for backup/export and migration instructions. Apply only new required migrations once, in their documented order, to the intended database. Site rollback does not undo database changes.
+- **Turnstile/TinaCloud/GitHub:** keep account integrations and keys valid; rotate credentials when required and update the matching encrypted configuration. Keep public comment submission and owner moderation working.
+
+### Official update references
+
+- [Docker Compose pull](https://docs.docker.com/reference/cli/docker/compose/pull/) and [up](https://docs.docker.com/reference/cli/docker/compose/up/)
+- [Immich upgrading](https://docs.immich.app/install/upgrading/) and [backup/restore](https://docs.immich.app/administration/backup-and-restore/)
+- [Cloudflared updates](https://developers.cloudflare.com/tunnel/guides/update-cloudflared/)
+- [Caddy installation/images](https://caddyserver.com/docs/install)
+- [TinaCMS upgrading](https://tina.io/docs/guides/upgrade-to-latest-version)
+- [Astro upgrading](https://docs.astro.build/en/upgrade-astro/)
+- [npm update](https://docs.npmjs.com/cli/v11/commands/npm-update/) and [outdated](https://docs.npmjs.com/cli/v11/commands/npm-outdated/)

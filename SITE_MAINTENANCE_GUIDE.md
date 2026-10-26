@@ -54,7 +54,7 @@ Verification includes `tests/field-note.test.mjs` for metadata, MDX-safe literal
 
 ## 3. Local setup and checks
 
-Required Node version: `>=22.22.0`.
+Required Node version: **22.22.0+ on the 22.x line, or 24.x**. The Tina CLI supports these two Node majors.
 
 ```bash
 npm install
@@ -512,11 +512,15 @@ npm ci
 npm outdated
 ```
 
-The repository currently requires Node `>=22.22.0`; also satisfy any higher requirement of the packages you intend to install. `npm ci` installs the committed versions reproducibly. In `npm outdated`, **Current** is installed, **Wanted** fits the declared version range, and **Latest** can include a breaking major release. A package with an exact version, such as `marked` or `yaml` in the current manifest, will not advance with a plain `npm update`.
+The repository supports Node **22.22.0+ on the 22.x line, or 24.x**; also satisfy any higher minimum of the packages you intend to install. `npm ci` installs the committed versions reproducibly. In `npm outdated`, **Current** is installed, **Wanted** fits the declared version range, and **Latest** can include a breaking major release. A package with an exact version, such as `marked` or `yaml` in the current manifest, will not advance with a plain `npm update`.
 
 Update one related group below, then do J before moving to another group. Read migration notes before using `@latest`, which may cross a major version. Do not use `npm audit fix --force` or `--legacy-peer-deps` to bypass an unexplained compatibility failure.
 
 ### H. Update TinaCMS, its CLI, and Astro integration
+
+The tested package baseline is `tinacms` **3.15.0**, `@tinacms/cli` **4.0.3**, and `@tinacms/astro` **0.8.0**. The CLI supports Node 22.x/24.x; the Astro integration supports this site's Astro 6.x. These package families use independent version numbers. `typescript` is an explicit development dependency so the type-check command uses the real compiler.
+
+You can ask ChatGPT to carry out this repository update through the connected GitHub App; a local website checkout on your own PC is optional. The PowerShell instructions below are for performing the same work yourself. In either workflow, commit package changes and the generated Tina lock together, then use **Publish Site** to deploy with the existing Cloudflare credentials.
 
 Read [Tina's upgrade guide](https://tina.io/docs/guides/upgrade-to-latest-version). Upgrade `tinacms` and `@tinacms/cli` together; their version numbers do not have to match. Check that `@tinacms/astro` supports the chosen Tina/Astro versions.
 

@@ -113,7 +113,7 @@ Open **Content → Import** and upload/paste Markdown or MDX. YAML frontmatter i
 
 ## Local development
 
-Requires Node `>=22.22.0`.
+Requires Node **22.22.0+ on the 22.x line, or 24.x** (the Node majors supported by the Tina CLI).
 
 ```bash
 npm install

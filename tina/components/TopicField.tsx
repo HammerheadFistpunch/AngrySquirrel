@@ -9,8 +9,9 @@ interface TopicSelection {
 interface TopicFieldProps {
     input: {
         name: string;
-        value?: TopicSelection[];
-        onChange: (event: ChangeEvent<TopicSelection[]>) => void;
+        value?: unknown;
+        // Tina types custom object-list controls as string fields at this boundary.
+        onChange: (event: ChangeEvent<string>) => void;
     };
     field: {
         label?: string | boolean;
@@ -52,7 +53,9 @@ const topicsQuery = `#graphql
 
 export default function TopicField({ input, field, meta }: TopicFieldProps) {
     const cms = useCMS();
-    const value = Array.isArray(input.value) ? input.value : [];
+    const value: TopicSelection[] = Array.isArray(input.value) ? input.value.filter(
+        (item): item is TopicSelection => typeof item === "object" && item !== null && typeof item.tag === "string",
+    ) : [];
     const selected = new Set(value.map((item) => item?.tag).filter(Boolean));
     const [topics, setTopics] = React.useState<Array<{ label: string; slug: string; reference: string; active: boolean }>>([]);
     const [status, setStatus] = React.useState("Loading Topics…");
@@ -94,7 +97,8 @@ export default function TopicField({ input, field, meta }: TopicFieldProps) {
             ? [...value, { tag: reference }]
             : value.filter((item) => item.tag !== reference);
         const deduped = [...new Map(next.map((item) => [item.tag, item])).values()];
-        input.onChange(deduped as unknown as ChangeEvent<TopicSelection[]>);
+        // Final Form accepts the stored object array directly, rather than a DOM event.
+        input.onChange(deduped as unknown as ChangeEvent<string>);
     };
 
     return (

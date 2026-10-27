@@ -1,4 +1,5 @@
 import cloudflareAccessPlugin from "@cloudflare/pages-plugin-cloudflare-access";
+import { getPublishPolicyError } from "../../../src/server/publish-policy.js";
 
 const jsonHeaders = {
     "cache-control": "no-store",
@@ -17,7 +18,7 @@ const getConfiguration = (env) => ({
     allowedEmail: env.PUBLISH_ALLOWED_EMAIL?.trim().toLowerCase(),
     deployHook: env.CLOUDFLARE_DEPLOY_HOOK_URL,
     repository: env.PUBLISH_GITHUB_REPOSITORY || "HammerheadFistpunch/GTP_Port",
-    branch: env.PUBLISH_GITHUB_BRANCH || "gpt-handoff",
+    branch: env.PUBLISH_GITHUB_BRANCH || "main",
     state: env.PUBLISH_STATE,
 });
 
@@ -158,4 +159,10 @@ const handlePublishRequest = async (context) => {
     }
 };
 
-export const onRequest = [authenticate, handlePublishRequest];
+const enforceProduction = (context) => {
+    const error = getPublishPolicyError(context.request.url, context.env);
+    if (error) return json({ configured: false, error }, { status: 403 });
+    return context.next();
+};
+
+export const onRequest = [enforceProduction, authenticate, handlePublishRequest];

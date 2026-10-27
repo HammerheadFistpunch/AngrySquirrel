@@ -1,6 +1,14 @@
-# GTP_Port Roadmap
+# AngrySquirrel Roadmap
 
-Last updated: 2026-10-22
+Last updated: 2026-10-27
+
+## Production workflow transition — 2026-10-27
+
+- Prepared `main` for production/content and `development` for feature testing from the latest `gpt-handoff` source.
+- Added a production-host/main-branch guard to the publishing relay; preview requests cannot access the production hook or KV lock.
+- Pages branch identity now overrides Tina branch environment overrides.
+- Package identity is `angrysquirrel`; GitHub repository rename remains pending.
+- Dashboard cutover and live acceptance checks remain pending; see `PRODUCTION_WORKFLOW.md`.
 
 ## Product direction
 
@@ -199,7 +207,7 @@ These are useful candidates but not current requirements:
 
 A feature is complete when applicable items are true:
 
-- implementation is on the latest `gpt-handoff` branch
+- implementation is on the latest `main` branch
 - stored content remains valid and portable
 - Tina editor behavior is verified
 - Astro build succeeds

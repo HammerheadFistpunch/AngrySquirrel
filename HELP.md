@@ -449,7 +449,7 @@ This is normally expected. Open **Settings → Publish Site** and compare Saved 
 
 ### A build failed
 
-The previous working Cloudflare deployment should remain live. Read the first useful build error, fix the content/source issue on `gpt-handoff`, save/push the correction, then publish again.
+The previous working Cloudflare deployment should remain live. Read the first useful build error, fix the content/source issue on `main`, save/push the correction, then publish again.
 
 ### Tina reports a schema mismatch
 

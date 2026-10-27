@@ -248,7 +248,7 @@ Local component appearance may live directly in `.astro` component files under `
 ## 8. Infrastructure map
 
 ```text
-GitHub: HammerheadFistpunch/GTP_Port:gpt-handoff
+GitHub: HammerheadFistpunch/GTP_Port:main
   │
   ├── TinaCloud reads/writes content
   │

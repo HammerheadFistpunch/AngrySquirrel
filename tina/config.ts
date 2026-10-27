@@ -8,7 +8,8 @@ import TopicField from "./components/TopicField";
 import { installAdminNavigation } from "./components/AdminNavigation";
 import { getImageSourceError } from "../src/lib/image-sources";
 
-const branch = process.env.GITHUB_BRANCH || process.env.CF_PAGES_BRANCH || process.env.HEAD || "gpt-handoff";
+// The actual Pages build branch takes priority over stale environment overrides.
+const branch = process.env.CF_PAGES_BRANCH || process.env.GITHUB_BRANCH || process.env.HEAD || "main";
 
 const linkFields = [
     { type: "string" as const, name: "label", label: "Label", required: true },

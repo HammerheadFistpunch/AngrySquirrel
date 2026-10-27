@@ -1,8 +1,10 @@
-# AngrySquirrel.org / GTP_Port
+# AngrySquirrel.org
 
 This repository contains the source for **AngrySquirrel.org**, a personal portfolio and editorial Journal built with Astro, TinaCMS, GitHub, Cloudflare Pages, Cloudflare Access, Immich, and Cloudflare R2.
 
 The project is intentionally content-portable: TinaCMS is the editing interface, but the durable source of truth is Markdown/MDX and structured content stored in this repository.
+
+> Branch migration is prepared. Cloudflare/Tina still use the previous setup until the cutover in [PRODUCTION_WORKFLOW.md](PRODUCTION_WORKFLOW.md) is completed.
 
 ## What the site does
 
@@ -21,7 +23,7 @@ The project is intentionally content-portable: TinaCMS is the editing interface,
 ```text
 Owner / editor
   → TinaCloud at /admin/
-  → saves content to GitHub gpt-handoff
+  → saves content to GitHub main
   → Publish Site triggers Cloudflare Pages
 
 Private media workflow
@@ -53,7 +55,9 @@ Public visitors
 ## Source of truth
 
 - Repository: `HammerheadFistpunch/GTP_Port`
-- Working/production-content branch: `gpt-handoff`
+- Production/content branch: `main`
+- Feature testing branch: `development`
+- Release and preview setup: [PRODUCTION_WORKFLOW.md](PRODUCTION_WORKFLOW.md)
 - Journal entries: `src/content/entries/`
 - Topics: `src/content/tags/`
 - Journal Sections: `src/content/journal-sections/`
@@ -79,7 +83,7 @@ TinaCloud is an editor. GitHub content is the durable source of truth.
    - **Pages** — Homepage, Journal Homepage, About, Contact, Resume, Custom Pages
    - **Content** — Journal, Journal Sections, Import
    - **Media** — Media Manager
-3. Edit and save. Tina commits the saved content to `gpt-handoff`.
+3. Edit and save. Tina commits the saved content to `main`.
 4. Continue editing as needed. Saving does **not** intentionally publish production.
 5. When the editing session is ready, open **Settings → Publish Site**.
 6. Publish once, then review the live site.

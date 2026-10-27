@@ -2,11 +2,15 @@
 
 This guide is for code, deployment, infrastructure, schema, security, and recovery work. Owner editing instructions live in `HELP.md`. For step-by-step PowerShell update instructions, see [section 13](#13-updating-the-site-and-its-dependencies-powershell).
 
+## Production and development branches
+
+See [PRODUCTION_WORKFLOW.md](PRODUCTION_WORKFLOW.md) for the pending dashboard cutover, preview isolation, and release procedure. The instructions below describe the target `main` workflow; until cutover finishes, retrieve and preserve newer Tina changes from `gpt-handoff` before advancing `main`. Production publishing is restricted to the public HTTPS site hosts and `main`.
+
 ## 1. Maintenance rule: start from the remote branch
 
 Before changing code:
 
-1. retrieve the current remote `gpt-handoff` head;
+1. retrieve the current remote `main` head;
 2. treat that branch as the source of truth;
 3. check whether Tina or another editor has added newer content commits;
 4. make maintenance changes on top of that exact head.
@@ -105,7 +109,7 @@ A schema change is incomplete until all applicable layers agree:
 
 ### Safe sequence
 
-1. Pull/resolve the latest `gpt-handoff` head.
+1. Pull/resolve the latest `main` head.
 2. Update `tina/config.ts`.
 3. Update Astro validation if the stored shape changed.
 4. Migrate stored content as needed.
@@ -114,7 +118,7 @@ A schema change is incomplete until all applicable layers agree:
 7. Review the generated lock; never hand-edit it.
 8. Run authoring tests, type check, and build.
 9. Commit/push the coherent change.
-10. Reindex `gpt-handoff` in TinaCloud if required.
+10. Reindex `main` in TinaCloud if required.
 11. Open `/admin/` and verify the affected editor.
 12. Deliberately publish and verify production.
 
@@ -140,13 +144,13 @@ Treat slugs as durable identifiers. Prefer retirement/aliases over destructive d
 
 ## 6. Deliberate publishing system
 
-Tina saves content commits to `gpt-handoff`; production publishing is a separate action.
+Tina saves content commits to `main`; production publishing is a separate action.
 
 ### Architecture
 
 ```text
 Tina save
-→ GitHub gpt-handoff changes
+→ GitHub main changes
 → no automatic production rebuild
 → Settings > Publish Site
 → /admin/api/publish
@@ -166,7 +170,7 @@ Automatic production branch deployments should remain disabled unless the delibe
 | `CLOUDFLARE_ACCESS_AUD` | variable | Access application audience |
 | `PUBLISH_ALLOWED_EMAIL` | variable | exact owner identity allowed to publish |
 | `PUBLISH_GITHUB_REPOSITORY` | variable | repository name |
-| `PUBLISH_GITHUB_BRANCH` | variable | `gpt-handoff` |
+| `PUBLISH_GITHUB_BRANCH` | variable | `main` |
 | `CLOUDFLARE_DEPLOY_HOOK_URL` | encrypted secret | production deploy hook |
 | `PUBLISH_STATE` | KV binding | duplicate-publish lock |
 
@@ -186,7 +190,7 @@ The deploy hook must never be exposed in browser-delivered code or committed sou
 A failed Pages build should not replace the last working deployment.
 
 1. Read the first useful Cloudflare build error.
-2. Fix the source/content problem on top of the latest `gpt-handoff`.
+2. Fix the source/content problem on top of the latest `main`.
 3. Push/save the correction.
 4. Allow any duplicate-publish lock to clear if necessary.
 5. Publish the corrected current branch head.
@@ -363,7 +367,7 @@ Use this section for routine updates. These instructions assume Windows PowerShe
 | cloudflared | Same Compose folder | Private website-to-Immich connection |
 | Immich Public Proxy | Same Compose folder | Shared albums and any galleries using them |
 | PostgreSQL + Valkey (`redis`) | Same Compose folder, following Immich release instructions | Immich and everything that depends on it |
-| TinaCMS + CLI + Astro integration | Local `GTP_Port` website checkout | Editor and site builds after deployment |
+| TinaCMS + CLI + Astro integration | Local AngrySquirrel website checkout | Editor and site builds after deployment |
 | Astro + MDX integration | Local website checkout | Public site generation |
 | Other npm packages | Local website checkout | Depends on the package; test before publishing |
 | Node.js + npm | Development PC and Pages build configuration | Local/cloud builds |
@@ -492,7 +496,7 @@ Open a known shared album while signed out, then check any website gallery using
 Use PowerShell on your development PC. This is the **website repository folder**, not `C:\IMMICH`. Enter the actual folder path when prompted:
 
 ```powershell
-$siteFolder = Read-Host 'Full path to your GTP_Port checkout'
+$siteFolder = Read-Host 'Full path to your AngrySquirrel checkout'
 Set-Location $siteFolder
 git status --short
 git remote -v
@@ -502,8 +506,8 @@ Confirm this is `HammerheadFistpunch/GTP_Port`. If status lists existing work, c
 
 ```powershell
 git fetch origin
-git switch gpt-handoff
-git pull --ff-only origin gpt-handoff
+git switch main
+git pull --ff-only origin main
 $updateBranch = 'maintenance/dependencies-' + (Get-Date -Format 'yyyyMMdd-HHmmss')
 git switch -c $updateBranch
 node --version
@@ -539,7 +543,7 @@ npm install tinacms@latest @tinacms/cli@latest @tinacms/astro@latest
 
 Then run `npm run dev`. Use the Tina-aware server, open its `/admin/` editor, and allow Tina to regenerate `tina/tina-lock.json`. Test editing, the Markdown toolbar, Quick Field Note, and the Immich picker. Press **Ctrl+C** when finished.
 
-Review and commit the generated schema lock with `package.json`/`package-lock.json` changes. Never edit the lock manually. Complete J before publishing. If the deployed editor reports **GraphQL Schema Mismatch**, confirm the updated schema/lock are committed to `gpt-handoff`, let TinaCloud finish indexing that branch, then reload. Use the available TinaCloud reindex action if needed; reindexing alone cannot fix a stale committed lock.
+Review and commit the generated schema lock with `package.json`/`package-lock.json` changes. Never edit the lock manually. Complete J before publishing. If the deployed editor reports **GraphQL Schema Mismatch**, confirm the updated schema/lock are committed to `main`, let TinaCloud finish indexing that branch, then reload. Use the available TinaCloud reindex action if needed; reindexing alone cannot fix a stale committed lock.
 
 ### I. Update Astro/MDX and the other npm dependencies
 
@@ -586,9 +590,9 @@ git commit -m 'Update site dependencies'
 git push -u origin $updateBranch
 ```
 
-Use your existing Git credentials or ask ChatGPT to publish through the connected GitHub App; no new GitHub CLI login is required for that workflow. On GitHub, create a pull request from the maintenance branch into **`gpt-handoff`**. Review/merge it after checks pass, preserving any newer Tina content. Then:
+Use your existing Git credentials or ask ChatGPT to publish through the connected GitHub App; no new GitHub CLI login is required for that workflow. On GitHub, create a pull request from the maintenance branch into **`main`**. Review/merge it after checks pass, preserving any newer Tina content. Then:
 
-1. Wait for TinaCloud to index `gpt-handoff` and verify the editor loads.
+1. Wait for TinaCloud to index `main` and verify the editor loads.
 2. Use **Settings → Publish Site** (or the existing deliberate Cloudflare deploy hook if the editor itself is broken). A Git push/merge alone is not intended to rebuild production.
 3. Confirm the Pages deployment succeeds and `/deployment.json` reports the intended deployed commit. Publishing releases all saved branch changes, including newer Tina content.
 4. Check homepage, Journal, an article, `/admin/`, picker browse/preview/R2 publication, and comments/moderation if the update touches them. Public comments must work signed out; admin APIs must still require Access.

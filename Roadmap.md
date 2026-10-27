@@ -7,8 +7,8 @@ Last updated: 2026-10-27
 - Prepared `main` for production/content and `development` for feature testing from the latest `gpt-handoff` source.
 - Added a production-host/main-branch guard to the publishing relay; preview requests cannot access the production hook or KV lock.
 - Pages branch identity now overrides Tina branch environment overrides.
-- Package identity is `angrysquirrel`; GitHub repository rename remains pending.
-- Dashboard cutover and live acceptance checks remain pending; see `PRODUCTION_WORKFLOW.md`.
+- Package identity and Cloudflare Pages project name are `angrysquirrel`; GitHub repository is `HammerheadFistpunch/AngrySquirrel`.
+- Production uses `main` with deliberate publishing; `development` builds to an owner-protected preview. Both branches passed live builds at the transition release. Real content-save/publish acceptance remains for the next normal editing session; see `PRODUCTION_WORKFLOW.md`.
 
 ## Product direction
 

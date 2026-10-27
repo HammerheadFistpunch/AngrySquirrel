@@ -248,7 +248,7 @@ Local component appearance may live directly in `.astro` component files under `
 ## 8. Infrastructure map
 
 ```text
-GitHub: HammerheadFistpunch/GTP_Port:main
+GitHub: HammerheadFistpunch/AngrySquirrel:main
   │
   ├── TinaCloud reads/writes content
   │

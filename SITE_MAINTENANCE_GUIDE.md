@@ -502,7 +502,7 @@ git status --short
 git remote -v
 ```
 
-Confirm this is `HammerheadFistpunch/GTP_Port`. If status lists existing work, commit or otherwise preserve it before continuing; do not discard it. Then run:
+Confirm this is `HammerheadFistpunch/AngrySquirrel`. If status lists existing work, commit or otherwise preserve it before continuing; do not discard it. Then run:
 
 ```powershell
 git fetch origin

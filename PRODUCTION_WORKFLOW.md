@@ -2,7 +2,11 @@
 
 ## Current status
 
-Prepared on 2026-10-27 from `gpt-handoff` commit `c2b5ccb0c5067e02bf4bee5d71cf78e260a26658`. The repository is still `HammerheadFistpunch/GTP_Port`. Branch preparation does not change Cloudflare hosting, TinaCloud, the GitHub default branch, or deploy hooks. Those dashboard changes and live acceptance checks remain pending.
+Cut over on 2026-10-27 from `gpt-handoff` commit `c2b5ccb0c5067e02bf4bee5d71cf78e260a26658`. GitHub repository: `HammerheadFistpunch/AngrySquirrel`; default branch: `main`. Cloudflare Pages project: `angrysquirrel`. Production runs `main` with automatic builds disabled and a main-specific encrypted deploy hook. Development builds automatically with owner-only Cloudflare Access and no production service bindings. Both environments passed the full Tina/Astro cloud build at transition commit `58a7194ac465b2f8b46f8d3f94cfb92450f7544f`.
+
+The existing Pages hostname remains `gtp-port.pages.dev`; renaming the project does not rename its immutable hostname. The protected development URL remains https://development.gtp-port.pages.dev and is authorized in TinaCloud. Public URLs remain https://angrysquirrel.org and https://media.angrysquirrel.org. Preserve these URLs, the existing project ID, storage and Access policies.
+
+Live homepage, Journal, production media library, Saved/Live publishing status and development publishing rejection were checked. Real content saves, publishing after edits, comment/moderation writes and Immich public-copy writes remain acceptance checks for the next normal editing session. Keep rollback credentials until those pass.
 
 `gpt-handoff` remains intact as the transition source. Do not delete it or stop preserving its Tina content until the cutover is verified. `master` is an older branch and is not the production baseline.
 
@@ -18,7 +22,7 @@ Continue writing real articles in the production Tina editor. Test features on d
 
 Merge main into development before starting work and again before a release, so newer Tina content is preserved. Resolve conflicts and rerun checks. Remove test entries/images/settings before merging development into main. After release, merge main back into development. Never reset or force-push either branch over newer content.
 
-## One-time dashboard cutover
+## Dashboard cutover procedure (completed; retained for rollback/recovery)
 
 1. Pause Tina saves briefly. Retrieve the latest `gpt-handoff` head again. If it has advanced since branch preparation, merge those changes into main, preserve both sides, validate, then bring development up to date. Record the current Cloudflare deployment and existing settings for rollback.
 2. On GitHub, set the repository default branch to main. The GitHub connection used here supports branch creation and Git Data writes, but does not expose repository settings changes. Keep existing history and branches.
@@ -27,7 +31,7 @@ Merge main into development before starting work and again before a release, so 
 5. Configure custom preview branch controls to include development (optionally feature/*). Exclude the old gpt-handoff branch from automatic previews. Keep the existing build command `npm run build`, output directory `dist`, and supported Node version.
 6. Review variables and bindings separately for Production and Preview using the table below. Create a new production deploy hook explicitly targeting main and store its URL only in the Production encrypted `CLOUDFLARE_DEPLOY_HOOK_URL` secret. A main branch variable does not retarget an old hook. Keep the old hook available for rollback until verification, then revoke it.
 7. Deploy main manually through the Pages dashboard/new hook for the initial cutover; the old deployed editor still targets the previous setup. Verify `/deployment.json` reports main and the intended SHA before using the new editor.
-8. Test the full production acceptance sequence below, resume normal editing, then deploy development as a protected preview. Record the actual development URL here once available. No verified preview URL exists yet.
+8. Test the full production acceptance sequence below, resume normal editing, then deploy development as a protected preview. The verified development URL is https://development.gtp-port.pages.dev.
 
 Cloudflare references: [branch controls](https://developers.cloudflare.com/pages/configuration/branch-build-controls/), [preview deployments](https://developers.cloudflare.com/pages/configuration/preview-deployments/), [deploy hooks](https://developers.cloudflare.com/pages/configuration/deploy-hooks/). Tina: [project settings](https://tina.io/docs/tinacloud/dashboard/projects).
 
@@ -38,7 +42,7 @@ Cloudflare references: [branch controls](https://developers.cloudflare.com/pages
 | `CF_PAGES_BRANCH` | Pages supplies main | Pages supplies development/feature branch; do not override |
 | `GITHUB_BRANCH` | Remove stale value or set main | Remove; never force preview to main |
 | Tina project ID/read-only token | Existing project values | Same project only if authorized for preview branch/origin |
-| `PUBLISH_GITHUB_REPOSITORY` | HammerheadFistpunch/GTP_Port until repository rename | No production publisher configuration needed |
+| `PUBLISH_GITHUB_REPOSITORY` | HammerheadFistpunch/AngrySquirrel | No production publisher configuration needed |
 | `PUBLISH_GITHUB_BRANCH` | main | Omit; production publisher is blocked on preview hosts |
 | Deploy hook and `PUBLISH_STATE` KV | Existing production binding plus new main hook | No production hook or KV binding |
 | Comments D1/Turnstile | Preserve existing production database, keys and bindings | Separate test database with the same migrations and preview-compatible keys, or leave unbound |
@@ -64,8 +68,8 @@ After merging and publishing main:
 5. Verify Quick Field Note, Immich browse/preview/public copy, signed-out comments and owner moderation.
 6. Confirm development remains separate and protected.
 
-## Rollback and remaining naming cleanup
+## Rollback and naming
 
 If cutover fails, restore the previous successful Pages deployment, previous production branch/variables and old matching hook, and verify Tina edits still target the preserved gpt-handoff branch. Preserve any main commits/content created during the attempt and reconcile them before retrying. A deployment rollback does not reverse D1 writes or R2 objects.
 
-Rename the GitHub repository to AngrySquirrel as a separate coordinated operation after this branch cutover works. Then update the publisher repository fallback, production variable, `.env.example`, documentation URLs, local remotes, Tina connection and Pages Git connection. Existing content, D1 data and public media URLs do not need renaming or recreation. Do not replace the Pages project merely to change a display name: its bindings, Access policies, domains and hooks must be preserved.
+The GitHub repository was renamed to AngrySquirrel while preserving repository ID `1294536426`. The publisher fallback, production repository variable, examples, documentation and local origin use the new name. Cloudflare project `angrysquirrel` preserves project ID `b81e3ccf-c902-4368-a297-6216b5fbb62e`. Provider Git connections retain the repository ID and may display the original cached repository name; verify their successful builds and Tina indexing before reconnecting anything. Existing content, D1 data, public media URLs, deploy hooks and Access policies are preserved. Do not replace the Pages project to rename its legacy pages.dev hostname.

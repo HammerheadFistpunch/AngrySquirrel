@@ -54,7 +54,7 @@ Public visitors
 
 ## Source of truth
 
-- Repository: `HammerheadFistpunch/GTP_Port`
+- Repository: `HammerheadFistpunch/AngrySquirrel`
 - Production/content branch: `main`
 - Feature testing branch: `development`
 - Release and preview setup: [PRODUCTION_WORKFLOW.md](PRODUCTION_WORKFLOW.md)

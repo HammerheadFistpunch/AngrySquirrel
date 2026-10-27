@@ -17,7 +17,7 @@ const getConfiguration = (env) => ({
     accessAudience: env.CLOUDFLARE_ACCESS_AUD,
     allowedEmail: env.PUBLISH_ALLOWED_EMAIL?.trim().toLowerCase(),
     deployHook: env.CLOUDFLARE_DEPLOY_HOOK_URL,
-    repository: env.PUBLISH_GITHUB_REPOSITORY || "HammerheadFistpunch/GTP_Port",
+    repository: env.PUBLISH_GITHUB_REPOSITORY || "HammerheadFistpunch/AngrySquirrel",
     branch: env.PUBLISH_GITHUB_BRANCH || "main",
     state: env.PUBLISH_STATE,
 });

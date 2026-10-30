@@ -202,7 +202,7 @@ export const installAdminNavigation = (cms: TinaCMS) => {
             Component: PublishSiteScreen,
             Icon: NavigationIcon,
             layout: "fullscreen",
-            navCategory: "Settings",
+            navCategory: "Content",
         } as never);
     }
 

@@ -79,13 +79,13 @@ TinaCloud is an editor. GitHub content is the durable source of truth.
 
 1. Open `https://angrysquirrel.org/admin/` and authenticate through Cloudflare Access/TinaCloud.
 2. Choose the appropriate area:
-   - **Settings** — Site Settings, Appearance, Topics, Publish Site
+   - **Settings** — Site Settings, Appearance, Topics
    - **Pages** — Homepage, Journal Homepage, About, Contact, Resume, Custom Pages
-   - **Content** — Journal, Journal Sections, Import
+   - **Content** — Journal, Journal Sections, Import, Publish Site
    - **Media** — Media Manager
 3. Edit and save. Tina commits the saved content to `main`.
 4. Continue editing as needed. Saving does **not** intentionally publish production.
-5. When the editing session is ready, open **Settings → Publish Site**.
+5. When the editing session is ready, open **Content → Publish Site**.
 6. Publish once, then review the live site.
 
 ### Change fonts, sizes, colors, or spacing

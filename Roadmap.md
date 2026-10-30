@@ -1,6 +1,6 @@
 # AngrySquirrel Roadmap
 
-Last updated: 2026-10-27
+Last updated: 2026-10-30
 
 ## Production workflow transition — 2026-10-27
 
@@ -9,6 +9,10 @@ Last updated: 2026-10-27
 - Pages branch identity now overrides Tina branch environment overrides.
 - Package identity and Cloudflare Pages project name are `angrysquirrel`; GitHub repository is `HammerheadFistpunch/AngrySquirrel`.
 - Production uses `main` with deliberate publishing; `development` builds to an owner-protected preview. Both branches passed live builds at the transition release. Real content-save/publish acceptance remains for the next normal editing session; see `PRODUCTION_WORKFLOW.md`.
+
+## Editor navigation — 2026-10-30
+
+- Moved **Publish Site** from Settings into Content, alongside the authoring tools, and updated the owner navigation guides.
 
 ## Product direction
 

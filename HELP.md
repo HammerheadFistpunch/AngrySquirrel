@@ -12,7 +12,6 @@ Current owner navigation:
   - Site Settings
   - Appearance
   - Topics
-  - Publish Site
 - **Pages**
   - Main Homepage
   - Journal Homepage
@@ -25,6 +24,7 @@ Current owner navigation:
   - Journal Sections
   - Quick Field Note
   - Import
+  - Publish Site
 - **Media**
   - Media Manager
 
@@ -37,7 +37,7 @@ Normal workflow:
 1. Edit content in Tina.
 2. Save as often as needed.
 3. Keep unfinished Journal entries or Custom Pages in **Draft**.
-4. When the editing session is ready, open **Settings → Publish Site**.
+4. When the editing session is ready, open **Content → Publish Site**.
 5. If Saved and Live differ, publish once.
 6. Review the deployed site after the saved commit is reported live.
 
@@ -146,7 +146,7 @@ Set **Featured Journal Story** under **Content → Journal Homepage** once. Both
 
 ## Pinned Journal posts
 
-Open **Content → Journal**, edit a post, and turn on **Pin in Journal**. You can pin any number of posts. Save, then use **Settings → Publish Site** to make the changes live.
+Open **Content → Journal**, edit a post, and turn on **Pin in Journal**. You can pin any number of posts. Save, then use **Content → Publish Site** to make the changes live.
 
 Pinned published posts appear above unpinned posts on the Journal page and within their Journal Section, with newest first in each group. Cards show a **Pinned** label. Turn the checkbox off to return a post to its normal date order. Drafts remain private. The featured story stays separate at the top of the Journal page and is not repeated in the list; pinning does not change the homepage preview.
 
@@ -445,7 +445,7 @@ For a full technical repository and route map, see `SITE_MAP.md`. For safe maint
 
 ### A save succeeded but the live site did not change
 
-This is normally expected. Open **Settings → Publish Site** and compare Saved vs Live. Production only changes after a deliberate publish.
+This is normally expected. Open **Content → Publish Site** and compare Saved vs Live. Production only changes after a deliberate publish.
 
 ### A build failed
 

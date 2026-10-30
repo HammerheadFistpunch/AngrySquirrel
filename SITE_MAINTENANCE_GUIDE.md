@@ -152,7 +152,7 @@ Tina saves content commits to `main`; production publishing is a separate action
 Tina save
 → GitHub main changes
 → no automatic production rebuild
-→ Settings > Publish Site
+→ Content > Publish Site
 → /admin/api/publish
 → Access JWT + exact-owner validation
 → server-only Cloudflare deploy hook
@@ -593,7 +593,7 @@ git push -u origin $updateBranch
 Use your existing Git credentials or ask ChatGPT to publish through the connected GitHub App; no new GitHub CLI login is required for that workflow. On GitHub, create a pull request from the maintenance branch into **`main`**. Review/merge it after checks pass, preserving any newer Tina content. Then:
 
 1. Wait for TinaCloud to index `main` and verify the editor loads.
-2. Use **Settings → Publish Site** (or the existing deliberate Cloudflare deploy hook if the editor itself is broken). A Git push/merge alone is not intended to rebuild production.
+2. Use **Content → Publish Site** (or the existing deliberate Cloudflare deploy hook if the editor itself is broken). A Git push/merge alone is not intended to rebuild production.
 3. Confirm the Pages deployment succeeds and `/deployment.json` reports the intended deployed commit. Publishing releases all saved branch changes, including newer Tina content.
 4. Check homepage, Journal, an article, `/admin/`, picker browse/preview/R2 publication, and comments/moderation if the update touches them. Public comments must work signed out; admin APIs must still require Access.
 

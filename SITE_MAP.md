@@ -65,8 +65,7 @@ A `journal/` organizational folder also exists under `src/content/flexible-pages
 /admin/
 ├── Settings
 │   ├── Site Settings
-│   ├── Topics
-│   └── Publish Site
+│   └── Topics
 ├── Pages
 │   ├── Main Homepage
 │   ├── Journal Homepage
@@ -77,7 +76,8 @@ A `journal/` organizational folder also exists under `src/content/flexible-pages
 ├── Content
 │   ├── Journal
 │   ├── Journal Sections
-│   └── Import
+│   ├── Import
+│   └── Publish Site
 └── Media
     └── Media Manager
 ```
@@ -100,7 +100,7 @@ Owner-facing name: **Topics**.
 
 Public route: `/tags/[slug]/`.
 
-### Settings → Publish Site
+### Content → Publish Site
 
 Uses:
 

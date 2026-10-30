@@ -1,0 +1,20 @@
+---
+title: Bluetti Elite 100 V2 detailed DC input specs
+journalSection: field-notes
+draft: false
+description: So this information isn't found on the internet and I know there are others like me that will want to know. If you are looking at a Bluetti Elite 100 V2 and are
+date: 2026-10-22T17:04:13.821Z
+coverImage: /uploads/field-note-2b82aaa2-dff4-45b9-b255-01361d5a499c.jpg
+---
+
+So this information isn't found on the internet and I know there are others like me that will want to know. If you are looking at a Bluetti Elite 100 V2 and are curious for more information about the DC inputs. On the site the listed specs are 12v-60 20A.  Which implies that you could get the full 20A at as low as 12vdc and as high as 60vdc.  This isn't the case.  This is the answer I got from their tech support:
+
+"The EL100V2 features a "PV-Pro mode." If this mode is disabled, the unit will limit the input current to 8A whenever the DC input voltage falls below 30V; this is a safeguard designed to prevent the vehicle’s cigarette lighter fuse from blowing when the unit is being charged via a car outlet. If you enable "PV-Pro mode," this 8A current limit is lifted for DC input voltages between 16V and 30V, allowing the unit to draw higher input power when connected to low-voltage solar panels."
+
+Summary:
+With PV-Pro disabled: Any voltage from 12-30Vdc is capped to 8A.  From 96 watts to 240 watts.  
+With PV-Pro enabled: 12-16v is still limited to 8a \(96-128 watts\). however from 16 up, higher current is allowed.  It might be the full 20A, or it could be reduce.  If the full 20A then 16-30vdc would let you accept between 320 - 600 watts.
+
+Note: The unit is also limited to 1000 watts input regardless of amps.  So at 60V, current is limited to 16.7A
+
+Hope that helps someone else.

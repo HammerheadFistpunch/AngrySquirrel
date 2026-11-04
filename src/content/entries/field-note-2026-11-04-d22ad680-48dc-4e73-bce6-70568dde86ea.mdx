@@ -1,0 +1,49 @@
+---
+title: Where am I? Alaska?
+journalSection: field-notes
+draft: false
+description: 'Go ahead and think of a zip code, now plop it into google. Did it return an accurate result? '
+date: 2026-11-04T15:08:15.338Z
+coverImage: /uploads/field-note-544c647d-f355-490a-8fab-3260c4628099.jpg
+---
+
+
+Go ahead and think of a zip code, now plop it into google. Did it return an accurate result?  I can't imagine it wouldn't. So why doesn't it when I try with half a dozen of the latest small local LLMs?  I tried the query "Where is zip code 84092" with the following models:
+
+Gemma
+Deepseek
+Qwen
+Phi
+Gemma
+Mistral
+Llama
+
+I used the light models and the medium models and got answers all over the place - literally.
+
+Deepseek R-1:8B was the closest with Mistral second.  
+
+The rest were so bad. SO bad.
+
+Results:
+
+Deepseek r-1:8b - It primarily serves Salt Lake City, particularly covering the downtown core and surrounding areas like South Salt Lake and Sandy in the western part of the city.
+
+Qwen3:8b - The zip code 84092 is located in Logan, Utah, United States, specifically in Cache County. This zip code covers parts of the city of Logan and surrounding areas.
+
+Phi 3-Mini: Zip code 84092 is located in the state of Alaska, United States. Specifically, it is in the city of Ketchikan. NOTE: The first time I asked this model it said San Diego
+
+Gemma4:12b: ZIP code 84092 is located in Provo, Utah, within Utah County.
+
+Mistral: Zip code 84092 is located in the state of Utah, United States. Specifically, it serves the area around West Jordan and South Jordan cities. This zip code is part of Salt Lake County.
+
+Llama3.2:3b: The zip code 84092 is located in the state of Utah, USA. Specifically, it is in the city of Park City, which is a mountain resort town in Park County.
+
+Google: The 84092 zip code covers parts of Sandy, Alta, and Granite in Salt Lake County, Utah
+
+So what's the point?  LLM is Large Language Model. Its designed to reason out answers and while that makes conversation possible, it means that basic logical data isn't often correctly modeled.  There are a few technical factors at play here, and of course most of these simplified models don't have the most up to date databases, or access to current revisions, but in the case of zip codes, the basic structure hasn't changed in 60+ years.  
+
+I got into a particularly frustrating argument with Phi3 about California zips.  It was insistent - Pathologically determined - that California zip codes range from starting at 80-98.  This isn't true. Its never been true. There is no evidence to support this.  When confronted with an accurate table of western state zip codes from the USPS site, it told me the table was in error.  
+
+Why does this matter?  Is this just "ai dumb" slop?  No, zip code lookup is a very common, very important part of some of the software I am writing. If I want to remote into my machine via HAM radio and ask my local models "what the weather is like where I am?", it needs to KNOW where I am in order to work, right?.  Right now, there isn't a reliable way to pass that information on to these lighter models contextually that is reliable.  
+
+Frustrating.

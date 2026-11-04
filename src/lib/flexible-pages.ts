@@ -7,6 +7,8 @@ export const RESERVED_TOP_LEVEL_PATHS = new Set([
     "journal",
     "portfolio",
     "resume",
+    "privacy",
+    "security",
     "uploads",
 ]);
 

@@ -3,12 +3,14 @@ pageType: standard
 title: About
 eyebrow: About me
 headline: What's the deal with the squirrel?
-description: About Patrick Rich and his mild-mannered squirrel-themed alter-ego.
+description: Learn about Patrick Rich, a Utah-based communicator, technical storyteller, video producer, photographer, and automotive writer.
 headerStyle: compact
 links: []
 ---
 
 ![](/uploads/detailed-squirrel-on-natural-rock.png)
+
+TheAngrySquirrel is Patrick Rich’s professional portfolio and personal journal. Based in Utah, I share work in strategic communication, video production, photography, automotive writing, overlanding, and technology projects.
 
 For more than a decade this happy little sciuridae screaming into the void has represented the online alter ego of one HammerheadFistpunch, aka Patrick Rich. Why a squirrel? I suppose I've always loved the way this family looks out for one another, standing up on a watchtower and sounding the warning. I admire the courage they show, choosing to expose themselves for the benefit of the group. The way they compile vital information and distill it down to unambiguous communication to take action. While I didn't know it years ago when I picked this picture, this little fellow would come to be more than just a wacky name and image, but a representation of what I strive to be.
 

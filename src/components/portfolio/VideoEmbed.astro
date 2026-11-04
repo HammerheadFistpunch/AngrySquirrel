@@ -13,7 +13,7 @@ interface Props {
 const { src, title, provider, poster, caption } = Astro.props;
 
 function detectProvider(url: string): "native" | "youtube" | "vimeo" {
-  if (/youtu\.be|youtube\.com/i.test(url)) return "youtube";
+  if (/youtu\.be|youtube(?:-nocookie)?\.com/i.test(url)) return "youtube";
   if (/vimeo\.com/i.test(url)) return "vimeo";
   return "native";
 }
@@ -55,6 +55,11 @@ const resolvedProvider = provider ?? detectProvider(src);
 const embedUrl = resolvedProvider === "native"
   ? undefined
   : getEmbedUrl(src, resolvedProvider);
+const watchUrl = embedUrl
+  ? resolvedProvider === "youtube"
+    ? `https://www.youtube.com/watch?v=${new URL(embedUrl).pathname.split("/").pop()}`
+    : `https://vimeo.com/${new URL(embedUrl).pathname.split("/").pop()}`
+  : undefined;
 const nativeUrl = sanitizeImageSrc(src);
 const sanitizedFallbackUrl = sanitizeHref(src, "");
 const fallbackUrl = /^https?:\/\//i.test(sanitizedFallbackUrl)
@@ -75,7 +80,10 @@ const fallbackUrl = /^https?:\/\//i.test(sanitizedFallbackUrl)
         allowfullscreen
       ></iframe>
     </div>
-    {caption && <figcaption>{caption}</figcaption>}
+    <figcaption>
+      {caption && <p>{caption}</p>}
+      <a href={watchUrl} rel="noopener noreferrer">Watch {title} on {resolvedProvider === "youtube" ? "YouTube" : "Vimeo"} →</a>
+    </figcaption>
   </figure>
 ) : (
   <div class="video-fallback" role="note">

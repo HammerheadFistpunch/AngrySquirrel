@@ -5,6 +5,7 @@ import { getEntry } from "astro:content";
 import Navigation from "../components/ui/Navigation.astro";
 import Footer from "../components/ui/Footer.astro";
 import appearance from "../data/appearance.json";
+import { createStructuredData, serializeStructuredData } from "../lib/structured-data";
 
 interface Props {
   title?: string;
@@ -12,6 +13,7 @@ interface Props {
   image?: string;
   type?: "website" | "article";
   canonicalPath?: string;
+  article?: { published?: Date; modified?: Date; section: string; keywords: string[] };
 }
 
 const {
@@ -20,6 +22,7 @@ const {
   image,
   type = "website",
   canonicalPath,
+  article,
 } = Astro.props;
 
 const siteEntry = await getEntry("settings", "site");
@@ -39,6 +42,14 @@ const canonicalUrl = new URL(
 const socialImage = image
   ? new URL(image, Astro.site ?? Astro.url.origin).toString()
   : undefined;
+
+const structuredData = createStructuredData({
+  name: site.siteName, description: site.siteDescription, author: site.copyrightName,
+  url: new URL("/", Astro.site ?? Astro.url.origin).href,
+}, {
+  url: canonicalUrl.href, title: title ?? site.siteName,
+  description: documentDescription, image: socialImage, article,
+});
 
 const uiFontStacks: Record<string, string> = {
   Lato: '"Lato", sans-serif',
@@ -106,6 +117,7 @@ const appearanceStyle = [
     <meta name="description" content={documentDescription} />
 
     <link rel="canonical" href={canonicalUrl} />
+    <script type="application/ld+json" set:html={serializeStructuredData(structuredData)} />
     <link
       rel="alternate"
       type="application/rss+xml"

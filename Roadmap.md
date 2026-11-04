@@ -1,6 +1,6 @@
 # AngrySquirrel Roadmap
 
-Last updated: 2026-10-30
+Last updated: 2026-11-04
 
 ## Production workflow transition — 2026-10-27
 
@@ -13,6 +13,15 @@ Last updated: 2026-10-30
 ## Editor navigation — 2026-10-30
 
 - Moved **Publish Site** from Settings into Content, alongside the authoring tools, and updated the owner navigation guides.
+
+## Crawler classification and public security — 2026-11-04
+
+- Clarified Homepage, About, Journal, and default site descriptions without changing the visual identity.
+- Added safely serialized WebSite, Person, WebPage/AboutPage/ContactPage and BlogPosting metadata, using real article dates/topics when present.
+- Added static response hardening, a public-only report-only CSP, and one-day production-host HSTS without subdomain/preload commitments.
+- Added linked Privacy and Security pages, sitemap entries, an expiring security.txt contact, and persistent external video links.
+- Cloudflare crawler/Browser Integrity Check behavior, www DNS/TLS/redirect checks, and vendor categorization reviews remain operational follow-ups. CSP enforcement requires preview testing and review of console violations first.
+- This implementation targets development; production release follows PRODUCTION_WORKFLOW.md and must preserve newer production/Tina content.
 
 ## Product direction
 

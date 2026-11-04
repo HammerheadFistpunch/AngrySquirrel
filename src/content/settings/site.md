@@ -1,7 +1,7 @@
 ---
 siteName: TheAngrySquirrel
 logoText: TheAngrySquirrel
-siteDescription: 'Patrick Rich - HammerheadFistpunch. Two names, one legend.'
+siteDescription: 'Patrick Rich’s professional portfolio and personal journal covering communication, video, photography, automotive writing, overlanding, and technology.'
 footerTitle: TheAngrySquirrel
 footerDescription: 'Patrick Rich - HammerheadFistpunch. Two names, one legend'
 copyrightName: Patrick Rich
@@ -34,6 +34,10 @@ navigation:
   - label: Get in Touch
     href: /contact/
 footerLinks:
+  - label: Privacy
+    href: /privacy/
+  - label: Security
+    href: /security/
   - label: Home
     href: /
   - label: Video

@@ -17,7 +17,10 @@ const { src, title, poster, caption } = Astro.props;
       <a href={src}>Open the video file</a> instead.
     </p>
   </video>
-  {caption && <figcaption>{caption}</figcaption>}
+  <figcaption>
+    {caption && <p>{caption}</p>}
+    <a href={src}>Open {title} as a video file →</a>
+  </figcaption>
 </figure>
 
 <style>

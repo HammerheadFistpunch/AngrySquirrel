@@ -69,7 +69,8 @@ const galleryImages = media.flatMap((item) => {
 const videos = media.filter((item) => item.type === "video");
 ---
 
-<BaseLayout title={title} description={description} image={safeCoverImage} type="article">
+<BaseLayout title={title} description={description} image={safeCoverImage} type="article"
+  article={{ published: date, modified: updatedDate, section: sectionLabel, keywords: tags.map((tag) => tag.label) }}>
   <article class="entry entry--article" aria-labelledby="entry-title">
     <Container width="reading">
       <nav class="back-links" aria-label="Back to collection">

@@ -34,6 +34,9 @@ The primary navigation is owner-managed in Tina under **Settings → Site Settin
 | `/archive/[slug]/` | Journal article detail | `src/pages/archive/` | `src/content/entries/*.mdx` |
 | `/tags/[slug]/` | Topic archive | `src/pages/tags/` | `src/content/tags/*.md` + Journal references |
 | `/about/` | About | `src/pages/about.astro` | `src/content/pages/about.md` |
+| `/privacy/` | Privacy notice | `src/pages/privacy.astro` | code-maintained; linked in Site Settings footer |
+| `/security/` | Security and classification contact | `src/pages/security.astro` | code-maintained; linked in Site Settings footer |
+| `/.well-known/security.txt` | Machine-readable security contact | `public/.well-known/security.txt` | renew annually in code |
 | `/contact/` | Contact | `src/pages/contact.astro` | `src/content/pages/contact.md` |
 | `/resume/` | Structured Resume | `src/pages/resume.astro` | `src/content/pages/resume.md` |
 | custom explicit paths | Portfolio/editorial standalone pages | `src/pages/[...path].astro` | `src/content/flexible-pages/` |

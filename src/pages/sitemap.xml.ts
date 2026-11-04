@@ -29,7 +29,7 @@ export const GET: APIRoute = async ({ site }) => {
     routes.set(url, lastmod?.toISOString());
   };
 
-  ["/", "/about/", "/contact/", "/journal/", "/resume/", "/tools/", "/tools/online/", "/tools/tire-thermal/"].forEach((path) =>
+  ["/", "/about/", "/contact/", "/privacy/", "/security/", "/journal/", "/resume/", "/tools/", "/tools/online/", "/tools/tire-thermal/"].forEach((path) =>
     add(path),
   );
 

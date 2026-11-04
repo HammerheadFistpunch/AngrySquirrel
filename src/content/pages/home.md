@@ -1,6 +1,6 @@
 ---
 pageType: home
-description: 'Patrick Rich, hammerheadfistpunch, utah, salt lake city, communicator.'
+description: 'Patrick Rich’s professional portfolio and personal journal: strategic communication, video, photography, automotive writing, overlanding, and technology projects.'
 sectionOrder:
   - intro
   - about

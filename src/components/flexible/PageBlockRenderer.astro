@@ -3,6 +3,7 @@ import type { CollectionEntry } from "astro:content";
 import { marked } from "marked";
 import ImmichGallery from "../portfolio/ImmichGallery.astro";
 import VideoEmbed from "../portfolio/VideoEmbed.astro";
+import GitHubRepositories from "./GitHubRepositories.astro";
 import Button from "../ui/Button.astro";
 import { sanitizeHref, sanitizeImageSrc } from "@tinacms/astro/sanitize";
 import type { FlexiblePageBlock } from "../../lib/page-blocks";
@@ -50,6 +51,8 @@ const renderableBlocks = blocks.filter((block) => {
       return hasText(block.url) && hasText(block.title);
     case "immichGallery":
       return Boolean(safeExternalUrl(block.shareUrl));
+    case "githubRepositories":
+      return block.repositories.length > 0;
     case "childPages":
       return hasText(block.heading) || hasText(block.introduction) ||
         block.paths.some((path) => publishedPages.has(normalizeFlexiblePagePath(path)));
@@ -103,6 +106,8 @@ const renderableBlocks = blocks.filter((block) => {
             imageAltPrefix={block.imageAltPrefix}
           />
         )}
+
+        {block._template === "githubRepositories" && <GitHubRepositories {...block} />}
 
         {block._template === "childPages" && (
           <>

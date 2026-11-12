@@ -75,6 +75,12 @@ npm run test:authoring
 npm run preview
 ```
 
+### Update GitHub Projects
+
+In Tina, open **Pages → Custom Pages → GitHub Projects**, then open the **GitHub Repositories** page block. Add or remove public repositories, drag them into the order you want, and enter each repository as `owner/repository`. The display title is optional. The project summary is required and appears even when GitHub is unavailable.
+
+Save and use **Content → Publish Site** when the edits are ready for production. On the public page, the browser requests the repository's language, stars, and last push date directly from GitHub. Those details can refresh between site deployments. GitHub credentials are unnecessary.
+
 ### Full validation gate
 
 Use for schema, route, dependency, import, authoring, or substantial rendering changes:

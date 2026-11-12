@@ -16,6 +16,8 @@ navigation:
         page: src/content/flexible-pages/portfolio/photography.md
       - label: Software / Ideation
         href: /journal/projects/
+      - label: GitHub Projects
+        page: src/content/flexible-pages/portfolio/github.md
       - label: Case Studies / Research
         href: /journal/projects/
       - label: Writing

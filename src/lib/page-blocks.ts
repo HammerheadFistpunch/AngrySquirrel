@@ -1,5 +1,6 @@
 import { z } from "astro/zod";
 import { getImageSourceError } from "./image-sources";
+import { isGitHubRepository } from "./github-repository";
 
 const optionalText = z.string().optional();
 const optionalImageSource = z.string().superRefine((value, context) => {
@@ -32,6 +33,15 @@ export const flexiblePageBlockSchema = z.discriminatedUnion("_template", [
         heading: optionalText,
         shareUrl: optionalText,
         imageAltPrefix: optionalText,
+    }),
+    z.object({
+        _template: z.literal("githubRepositories"),
+        heading: optionalText,
+        repositories: z.array(z.object({
+            repository: z.string().trim().refine(isGitHubRepository, "Use a GitHub owner/repository name."),
+            title: optionalText,
+            summary: z.string().trim().min(1),
+        })).default([]),
     }),
     z.object({
         _template: z.literal("childPages"),

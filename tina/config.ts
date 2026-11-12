@@ -7,6 +7,7 @@ import PublicationStatusField from "./components/PublicationStatusField";
 import TopicField from "./components/TopicField";
 import { installAdminNavigation } from "./components/AdminNavigation";
 import { getImageSourceError } from "../src/lib/image-sources";
+import { isGitHubRepository } from "../src/lib/github-repository";
 
 // The actual Pages build branch takes priority over stale environment overrides.
 const branch = process.env.CF_PAGES_BRANCH || process.env.GITHUB_BRANCH || process.env.HEAD || "main";
@@ -113,6 +114,33 @@ const flexiblePageBlockTemplates = [
             { type: "string" as const, name: "heading", label: "Gallery Heading" },
             { type: "string" as const, name: "shareUrl", label: "Public Immich Share URL", required: true },
             { type: "string" as const, name: "imageAltPrefix", label: "Image Alt Prefix", description: "Short description used before each image number, such as Event photo." },
+        ],
+    },
+    {
+        name: "githubRepositories",
+        label: "GitHub Repositories",
+        ui: { defaultItem: { repositories: [] } },
+        fields: [
+            { type: "string" as const, name: "heading", label: "Optional Heading" },
+            {
+                type: "object" as const,
+                name: "repositories",
+                label: "Repositories",
+                list: true,
+                ui: { itemProps: (item: Record<string, unknown>) => ({ label: (item?.title || item?.repository || "Repository") as string }) },
+                fields: [
+                    {
+                        type: "string" as const,
+                        name: "repository",
+                        label: "Public GitHub Repository",
+                        description: "Use owner/repository, for example HammerheadFistpunch/MyAPRS.",
+                        required: true,
+                        ui: { validate: (value?: string) => value && isGitHubRepository(value.trim()) ? undefined : "Enter a GitHub owner/repository name." },
+                    },
+                    { type: "string" as const, name: "title", label: "Display Title" },
+                    { type: "string" as const, name: "summary", label: "Project Summary", required: true, ui: { component: "textarea" } },
+                ],
+            },
         ],
     },
     {

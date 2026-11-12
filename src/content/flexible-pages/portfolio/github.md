@@ -3,8 +3,11 @@ title: GitHub Projects
 path: portfolio/github
 description: A few of my coding projects
 eyebrow: Portfolio
+headerImage: '/uploads/ChatGPT-Image-Aug-18,-2026,-02_37_40-PM.png'
 navigationLabel: GitHub Projects
 draft: false
+seoTitle: Patrick Rich GitHub Repo link
+seoDescription: Patrick Rich GitHub Repo and projects respository
 blocks:
   - repositories:
       - repository: HammerheadFistpunch/Viewshed

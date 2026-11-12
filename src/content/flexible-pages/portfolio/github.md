@@ -1,13 +1,12 @@
 ---
 title: GitHub Projects
 path: portfolio/github
-description: Selected software projects for amateur radio, terrain analysis, and backup power.
+description: A few of my coding projects
 eyebrow: Portfolio
 navigationLabel: GitHub Projects
 draft: false
 blocks:
-  - _template: githubRepositories
-    repositories:
+  - repositories:
       - repository: HammerheadFistpunch/Viewshed
         title: Signal Peak
         summary: Map radio coverage and see how terrain affects VHF and APRS links before choosing a station location.
@@ -17,4 +16,6 @@ blocks:
       - repository: HammerheadFistpunch/UPSflow
         title: UPSflow
         summary: Monitor EcoFlow River 2 battery units over Bluetooth and make their power and battery readings available to local tools.
+    _template: githubRepositories
 ---
+

@@ -10,7 +10,7 @@ seoTitle: Patrick Rich GitHub Repo link
 seoDescription: Patrick Rich GitHub Repo and projects respository
 blocks:
   - repositories:
-      - repository: HammerheadFistpunch/Viewshed
+      - repository: HammerheadFistpunch/SignalPeak
         title: Signal Peak
         summary: Map radio coverage and see how terrain affects VHF and APRS links before choosing a station location.
       - repository: HammerheadFistpunch/UPSflow

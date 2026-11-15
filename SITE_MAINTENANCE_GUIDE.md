@@ -528,6 +528,15 @@ Update one related group below, then do J before moving to another group. Read m
 
 ### H. Update TinaCMS, its CLI, and Astro integration
 
+**From the production CMS** open **Content → Update Tina** and click **Update Tina**. GitHub Actions installs the latest Tina packages, regenerates the schema lock, runs authoring tests and local builds, and opens a PR if files changed. The screen links to the workflow log and PR. After merging the PR and allowing TinaCloud to index `main`, use **Content → Publish Site** to release it. Check the full TinaCloud build in Cloudflare and verify the editor after deployment.
+
+One-time setup:
+
+1. In GitHub, restrict a fine-grained personal access token to `HammerheadFistpunch/AngrySquirrel` with **Actions: Read and write** and **Pull requests: Read-only**. In Cloudflare Pages → angrysquirrel → Settings → Variables and Secrets, add it as an encrypted **Production** secret named `TINA_UPDATE_GITHUB_TOKEN`. The endpoint also uses the existing Cloudflare Access and `PUBLISH_ALLOWED_EMAIL` settings.
+2. In the GitHub repository's **Settings → Actions → General → Workflow permissions**, enable **Allow GitHub Actions to create and approve pull requests**. The workflow requests only contents and pull-request write permissions and opens PRs without approving them.
+3. Deploy the CMS change using **Publish Site**. Afterward, **Update Tina** is available on the production admin site.
+
+
 The tested package baseline is `tinacms` **3.15.0**, `@tinacms/cli` **4.0.3**, and `@tinacms/astro` **0.8.0**. The CLI supports Node 22.x/24.x; the Astro integration supports this site's Astro 6.x. These package families use independent version numbers. `typescript` is an explicit development dependency so the type-check command uses the real compiler.
 
 You can ask ChatGPT to carry out this repository update through the connected GitHub App; a local website checkout on your own PC is optional. The PowerShell instructions below are for performing the same work yourself. In either workflow, commit package changes and the generated Tina lock together, then use **Publish Site** to deploy with the existing Cloudflare credentials.

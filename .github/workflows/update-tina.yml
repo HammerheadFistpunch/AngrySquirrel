@@ -1,0 +1,56 @@
+name: Update Tina
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: tina-update
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install current Tina releases
+        run: npm install tinacms@latest @tinacms/cli@latest @tinacms/astro@latest
+      - name: Validate Tina and Astro
+        run: |
+          npm run test:authoring
+          npx --no-install tinacms build --local --skip-cloud-checks --noTelemetry
+          npm run build:astro
+          npx tsc --noEmit
+          git diff --check
+      - name: Open dependency update pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git add package.json package-lock.json tina/tina-lock.json
+          if git diff --cached --quiet; then
+            echo 'Tina is up to date.' >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          branch="maintenance/tina-update-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git switch -c "$branch"
+          git commit -m 'Update TinaCMS'
+          gh auth setup-git
+          git push origin "HEAD:refs/heads/$branch"
+          pr_url=$(gh pr create --base main --head "$branch" --title 'Update TinaCMS' \
+            --body 'Updates TinaCMS, its CLI, and the Astro integration. GitHub Actions validated the local Tina build, Astro build, and authoring tests.')
+          echo "Review the update at $pr_url." >> "$GITHUB_STEP_SUMMARY"

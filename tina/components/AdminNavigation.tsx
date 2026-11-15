@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import type { TinaCMS } from "tinacms";
 import { CommentsScreen } from "./CommentsScreen";
 import { PublishSiteScreen } from "./PublishSite";
+import { UpdateTinaScreen } from "./UpdateTina";
 import { ImportEntryScreen } from "./ImportEntryScreen";
 import { FieldNoteScreen } from "./FieldNoteScreen";
 
@@ -200,6 +201,17 @@ export const installAdminNavigation = (cms: TinaCMS) => {
             __type: "screen",
             name: "Publish Site",
             Component: PublishSiteScreen,
+            Icon: NavigationIcon,
+            layout: "fullscreen",
+            navCategory: "Content",
+        } as never);
+    }
+
+    if (!screens.some((screen) => screen.name === "Update Tina")) {
+        cms.plugins.add({
+            __type: "screen",
+            name: "Update Tina",
+            Component: UpdateTinaScreen,
             Icon: NavigationIcon,
             layout: "fullscreen",
             navCategory: "Content",

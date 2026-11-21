@@ -43,6 +43,8 @@ Normal workflow:
 
 If Saved and Live match, there is nothing new to publish.
 
+If **Publish access is unavailable** appears while Tina is open, the separate Cloudflare Access session for the publishing API may need renewal. Open **Sign in for publishing**, complete the Cloudflare sign-in in the new tab, return to Tina, and press **Check status**. An access error alone does not mean the live deployment failed.
+
 If **Publishing…** remains after a failed build and Cloudflare shows no active production deployment, use **Clear stuck status** and then **Publish Site** again. Clearing the status does not cancel a Cloudflare build, so check the deployment list first. Otherwise the publish lock clears automatically after 15 minutes.
 
 ## 3. Journal entries

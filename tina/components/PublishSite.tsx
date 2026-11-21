@@ -36,11 +36,7 @@ const shortCommit = (commit: string) =>
 const readJson = async <T,>(response: Response): Promise<T> => {
     const contentType = response.headers.get("content-type") || "";
     if (!contentType.includes("application/json")) {
-        throw new Error(
-            response.ok
-                ? "The publish service returned an unexpected response."
-                : "Publish access is unavailable. Sign in through /admin and try again.",
-        );
+        throw new Error("Publish access is unavailable. Sign in to Cloudflare Access for publishing, then check status again.");
     }
 
     const body = (await response.json()) as T & { error?: string };
@@ -186,6 +182,7 @@ export const PublishSiteScreen = () => {
     };
 
     const canPublish = phase === "pending";
+    const needsPublishSignIn = phase === "error" && message.startsWith("Publish access is unavailable.");
     const statusColor = phase === "error" ? "#c2410c" : phase === "current" || phase === "published" ? "#166534" : "#334155";
 
     return (
@@ -237,6 +234,16 @@ export const PublishSiteScreen = () => {
                     >
                         Check status
                     </button>
+                    {needsPublishSignIn && (
+                        <a
+                            href={publishEndpoint}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ background: "white", border: "1px solid #94a3b8", borderRadius: "0.45rem", color: "#0f172a", fontWeight: 700, padding: "0.75rem 1rem", textDecoration: "none" }}
+                        >
+                            Sign in for publishing ↗
+                        </a>
+                    )}
                     {phase === "publishing" && publishStatus?.activePublish && (
                         <button
                             type="button"
@@ -249,9 +256,9 @@ export const PublishSiteScreen = () => {
                 </div>
             </section>
 
-            {phase === "error" && (
+            {phase === "error" && !needsPublishSignIn && (
                 <p style={{ color: "#7c2d12", lineHeight: 1.6, marginTop: "1rem" }}>
-                    The live site has not been replaced. Check Cloudflare Pages configuration or the most recent build, then use <strong>Check status</strong> before retrying.
+                    Check Cloudflare Pages configuration or the most recent build, then use <strong>Check status</strong> before retrying.
                 </p>
             )}
         </main>

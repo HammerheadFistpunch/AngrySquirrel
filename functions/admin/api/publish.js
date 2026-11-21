@@ -102,9 +102,10 @@ const handlePublishRequest = async (context) => {
                 activePublish,
             });
         } catch (error) {
+            console.error("Publish status lookup failed:", error instanceof Error ? error.message : "Unknown error");
             return json(
                 { error: error instanceof Error ? error.message : "Unable to check publish status." },
-                { status: 502 },
+                { status: 503 },
             );
         }
     }

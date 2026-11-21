@@ -36,7 +36,15 @@ const shortCommit = (commit: string) =>
 const readJson = async <T,>(response: Response): Promise<T> => {
     const contentType = response.headers.get("content-type") || "";
     if (!contentType.includes("application/json")) {
-        throw new Error("Publish access is unavailable. Sign in to Cloudflare Access for publishing, then check status again.");
+        if (response.status === 401 || response.status === 403 ||
+            (response.url && new URL(response.url).hostname.endsWith(".cloudflareaccess.com"))) {
+            throw new Error("Publish access is unavailable. Sign in to Cloudflare Access for publishing, then check status again.");
+        }
+        throw new Error(
+            response.ok
+                ? "The publish service returned an unexpected response."
+                : `The publish service returned HTTP ${response.status}. Check Cloudflare Pages Functions logs.`,
+        );
     }
 
     const body = (await response.json()) as T & { error?: string };
@@ -258,7 +266,7 @@ export const PublishSiteScreen = () => {
 
             {phase === "error" && !needsPublishSignIn && (
                 <p style={{ color: "#7c2d12", lineHeight: 1.6, marginTop: "1rem" }}>
-                    Check Cloudflare Pages configuration or the most recent build, then use <strong>Check status</strong> before retrying.
+                    Check the production deployment's Pages Functions logs, then use <strong>Check status</strong> before retrying.
                 </p>
             )}
         </main>

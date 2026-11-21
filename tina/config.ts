@@ -182,7 +182,7 @@ const flexiblePageBlockTemplates = [
                     { type: "string" as const, name: "description", label: "Description", ui: { component: "textarea" } },
                     { type: "image" as const, name: "image", label: "Image", ui: externalImageUi },
                     { type: "string" as const, name: "imageAlt", label: "Image Alt Text" },
-                    { type: "string" as const, name: "internalPath", label: "Internal Custom Page Path", description: "Use a Custom Page path without a leading slash, such as portfolio/demos-and-applets/tire-thermal. If this resolves to a published Custom Page, it takes priority over the URL below." },
+                    { type: "string" as const, name: "internalPath", label: "Internal Custom Page Path", description: "Use a Custom Page path without a leading slash, such as tools/tire-thermal. If this resolves to a published Custom Page, it takes priority over the URL below." },
                     { type: "string" as const, name: "href", label: "Custom or External URL", description: "Use a site path or full external URL when the tile does not target another Custom Page." },
                     { type: "string" as const, name: "linkLabel", label: "Link Label", description: "Optional. Defaults to View." },
                     { type: "string" as const, name: "size", label: "Tile Size", required: true, options: [

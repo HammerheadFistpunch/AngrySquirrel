@@ -1,5 +1,5 @@
 ---
-title: GitHub Projects
+title: Software
 path: portfolio/github
 description: A few of my coding projects
 eyebrow: Portfolio
@@ -21,4 +21,5 @@ blocks:
         summary: A tool that integrates CutPoint Ai aided editing tool with DaVinci Resolve Studio
     _template: githubRepositories
 ---
+
 

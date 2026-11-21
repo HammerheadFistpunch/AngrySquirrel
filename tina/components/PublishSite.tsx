@@ -158,6 +158,33 @@ export const PublishSiteScreen = () => {
         }
     };
 
+    const clearStuckPublish = async () => {
+        const targetCommit = publishStatus?.activePublish?.targetCommit;
+        if (!targetCommit) return;
+        if (!window.confirm(
+            "Clear the publishing status? Check that Cloudflare has no active production build first. This does not cancel a build already running in Cloudflare.",
+        )) return;
+
+        setPhase("checking");
+        setMessage("Clearing the previous publishing status…");
+        try {
+            const response = await fetch(publishEndpoint, {
+                method: "DELETE",
+                cache: "no-store",
+                credentials: "same-origin",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({ targetCommit }),
+            });
+            if (!response.ok) {
+                throw new Error(`Could not clear publishing status (${response.status}).`);
+            }
+            await refresh();
+        } catch (error) {
+            setPhase("error");
+            setMessage(error instanceof Error ? error.message : "Could not clear publishing status.");
+        }
+    };
+
     const canPublish = phase === "pending";
     const statusColor = phase === "error" ? "#c2410c" : phase === "current" || phase === "published" ? "#166534" : "#334155";
 
@@ -210,6 +237,15 @@ export const PublishSiteScreen = () => {
                     >
                         Check status
                     </button>
+                    {phase === "publishing" && publishStatus?.activePublish && (
+                        <button
+                            type="button"
+                            onClick={() => void clearStuckPublish()}
+                            style={{ background: "white", border: "1px solid #94a3b8", borderRadius: "0.45rem", cursor: "pointer", fontWeight: 700, padding: "0.75rem 1rem" }}
+                        >
+                            Clear stuck status
+                        </button>
+                    )}
                 </div>
             </section>
 

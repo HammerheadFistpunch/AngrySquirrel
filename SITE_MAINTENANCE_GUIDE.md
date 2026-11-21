@@ -198,7 +198,7 @@ A failed Pages build should not replace the last working deployment.
 1. Read the first useful Cloudflare build error.
 2. Fix the source/content problem on top of the latest `main`.
 3. Push/save the correction.
-4. Allow any duplicate-publish lock to clear if necessary.
+4. If Cloudflare shows no active production deployment, use **Clear stuck status** in Tina to remove the previous publish lock; otherwise wait for the lock to expire after 15 minutes. Clearing the lock does not cancel a running Cloudflare build.
 5. Publish the corrected current branch head.
 
 If the deploy hook may have leaked, revoke it first, create a replacement, update the encrypted secret, then deploy again.

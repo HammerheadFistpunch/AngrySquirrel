@@ -12,7 +12,7 @@ import {
 } from "../lib/flexible-pages";
 
 export async function getStaticPaths() {
-  const reservedStaticPaths = new Set(["tools/tire-thermal"]);
+  const reservedStaticPaths = new Set(["portfolio/demos-and-applets/tire-thermal"]);
   const pages = await getCollection("flexiblePages");
   const publishedPages = pages.filter((page) => {
     if (page.data.draft) return false;

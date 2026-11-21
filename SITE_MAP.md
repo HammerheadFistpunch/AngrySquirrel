@@ -9,6 +9,9 @@ This document maps the public site, TinaCMS editing areas, and the source locati
 ├── Portfolio destinations
 │   ├── /portfolio/video/
 │   ├── /portfolio/photography/
+│   ├── /portfolio/github/ (Software)
+│   ├── /portfolio/demos-and-applets/
+│   │   └── /portfolio/demos-and-applets/tire-thermal/
 │   └── Journal-backed portfolio/project destinations
 ├── /journal/
 │   ├── section views
@@ -55,10 +58,13 @@ Current portfolio files include:
 ```text
 src/content/flexible-pages/portfolio/
 ├── video.md
-└── photography.md
+├── photography.md
+├── github.md (Software)
+├── demos-and-applets.md
+└── demos-and-applets/tire-thermal.md
 ```
 
-These correspond to the dedicated Video and Photography portfolio destinations. Other portfolio-style destinations may intentionally point into Journal content rather than requiring a separate Portfolio collection.
+These correspond to the Video, Photography, Software, and Demos and Applets portfolio destinations. The ballast surf simulator lives at `public/ballast/SurfDemo.html`; the tire estimator has a dedicated Astro route. Former `/tools/` URLs redirect to their portfolio counterparts through `public/_redirects`. Other portfolio-style destinations may intentionally point into Journal content.
 
 A `journal/` organizational folder also exists under `src/content/flexible-pages/`; inspect each document's explicit `path` before assuming its public URL.
 

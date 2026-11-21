@@ -1,8 +1,8 @@
 ---
 title: Tire Thermal Risk Estimator
-path: tools/tire-thermal
+path: portfolio/demos-and-applets/tire-thermal
 description: Compare cold and hot tire pressure with IR surface temperature, speed, and time to identify elevated thermal-load signals.
-eyebrow: Online Tool
+eyebrow: Applet
 headerImage: ''
 navigationLabel: Tire Thermal Risk Estimator
 draft: false

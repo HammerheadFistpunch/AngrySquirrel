@@ -16,21 +16,16 @@ navigation:
         page: src/content/flexible-pages/portfolio/photography.md
       - label: Software / Ideation
         href: /journal/projects/
-      - label: GitHub Projects
+      - label: Software
         page: src/content/flexible-pages/portfolio/github.md
+      - label: Demos and Applets
+        page: src/content/flexible-pages/portfolio/demos-and-applets.md
       - label: Case Studies / Research
         href: /journal/projects/
       - label: Writing
         href: /journal/
   - label: Journal
     href: /journal/
-  - label: Tools
-    href: /tools/
-    children:
-      - label: Software
-        href: /tools/software/
-      - label: Online Tools
-        href: /tools/online/
   - label: Resume
     href: /resume/
   - label: Get in Touch
@@ -46,8 +41,8 @@ footerLinks:
     href: /portfolio/video/
   - label: Photography
     href: /portfolio/photography/
-  - label: Tools
-    href: /tools/
+  - label: Demos and Applets
+    href: /portfolio/demos-and-applets/
   - label: Projects
     href: /journal/projects/
   - label: Journal

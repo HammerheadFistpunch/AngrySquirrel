@@ -23,6 +23,11 @@ Last updated: 2026-11-04
 - Cloudflare crawler/Browser Integrity Check behavior, www DNS/TLS/redirect checks, and vendor categorization reviews remain operational follow-ups. CSP enforcement requires preview testing and review of console violations first.
 - This implementation targets development; production release follows PRODUCTION_WORKFLOW.md and must preserve newer production/Tina content.
 
+## Portfolio navigation — 2026-11-21
+
+- Retired the Tools section in favor of the Software and Demos and Applets portfolio pages.
+- Linked the ballast surf simulator and moved the tire estimator under Demos and Applets; legacy Tools URLs redirect to their new locations.
+
 ## Product direction
 
 AngrySquirrel.org is intended to remain a fast, low-maintenance personal site with two equally important jobs:

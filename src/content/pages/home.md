@@ -33,8 +33,10 @@ portfolioLinks:
     - label: Software / Ideation
       href: /journal/projects/
       image: /uploads/1772313990355.jpg
-    - label: GitHub Projects
+    - label: Software
       href: /portfolio/github/
+    - label: Demos and Applets
+      href: /portfolio/demos-and-applets/
     - label: Case Studies / Research
       href: /journal/projects/
       image: /uploads/wordpress/2024/06/image-8.png

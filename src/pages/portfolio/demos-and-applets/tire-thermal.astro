@@ -1,20 +1,19 @@
 ---
 import { getCollection, getEntry, render } from "astro:content";
-import BaseLayout from "../../layouts/BaseLayout.astro";
-import Container from "../../components/ui/Container.astro";
-import PageBlockRenderer from "../../components/flexible/PageBlockRenderer.astro";
-import TireThermalCalculator from "../../components/tools/TireThermalCalculator.astro";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import Container from "../../../components/ui/Container.astro";
+import PageBlockRenderer from "../../../components/flexible/PageBlockRenderer.astro";
+import TireThermalCalculator from "../../../components/tools/TireThermalCalculator.astro";
 
-const page = await getEntry("flexiblePages", "tools/tire-thermal");
+const page = await getEntry("flexiblePages", "portfolio/demos-and-applets/tire-thermal");
 if (!page) {
-  throw new Error("Missing Custom Page content: tools/tire-thermal");
+  throw new Error("Missing Custom Page content: portfolio/demos-and-applets/tire-thermal");
 }
 
 const flexiblePages = await getCollection("flexiblePages");
 const { Content } = await render(page);
 const breadcrumbs = [
-  { label: "Tools", href: "/tools/" },
-  { label: "Online Tools", href: "/tools/online/" },
+  { label: "Demos and Applets", href: "/portfolio/demos-and-applets/" },
 ];
 ---
 
@@ -22,7 +21,7 @@ const breadcrumbs = [
   title={page.data.seoTitle || page.data.title}
   description={page.data.seoDescription || page.data.description}
   image={page.data.seoImage || undefined}
-  canonicalPath="/tools/tire-thermal/"
+  canonicalPath="/portfolio/demos-and-applets/tire-thermal/"
 >
   <section class="tool-page">
     <Container width="wide">

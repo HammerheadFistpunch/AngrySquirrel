@@ -4,11 +4,22 @@ path: portfolio/github
 description: A few of my coding projects
 eyebrow: Portfolio
 headerImage: '/uploads/ChatGPT-Image-Aug-18,-2026,-02_37_40-PM.png'
-navigationLabel: GitHub Projects
+navigationLabel: Software
 draft: false
-seoTitle: Patrick Rich GitHub Repo link
-seoDescription: Patrick Rich GitHub Repo and projects respository
+seoTitle: Software | Patrick Rich
+seoDescription: Software projects, repositories, and releases by Patrick Rich
 blocks:
+  - heading: Downloads
+    tiles:
+      - title: Signal Peak
+        eyebrow: Radio software
+        description: Download the latest Signal Peak release.
+        image: /uploads/Signal-Peak-Large.svg
+        imageAlt: Signal Peak
+        href: 'https://github.com/HammerheadFistpunch/Viewshed/releases'
+        linkLabel: Download Signal Peak
+        size: small
+    _template: bentoGrid
   - repositories:
       - repository: HammerheadFistpunch/SignalPeak
         title: Signal Peak
